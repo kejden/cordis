@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: cordis-db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: project
+    ports:
+      - '5432:5432'
