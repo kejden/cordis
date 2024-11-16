@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components  {
+    .loginBackGround{
+        @apply h-screen bg-cover bg-center flex items-center justify-center w-full;
+        background-image: url('assets/img/login-background.png');
+    }
+}
