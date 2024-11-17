@@ -27,5 +27,5 @@ public class AccountSignUp {
 
     @NotBlank
     @Length(min=2, max = 15)
-    private String name;
+    private String userName;
 }

@@ -3,6 +3,9 @@ package io.ndk.cordis_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -21,6 +24,12 @@ public class UserEntity {
     private String password;
 
     @Column(nullable = false, length = 15)
-    private String name;
+    private String userName;
+
+    @OneToMany(mappedBy = "receiver",cascade = CascadeType.ALL)
+    private List<FriendEntity> responseList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender",cascade = CascadeType.ALL)
+    private List<FriendEntity> requestList = new ArrayList<>();
 
 }

@@ -1,20 +1,17 @@
-package io.ndk.cordis_backend.dto.response;
+package io.ndk.cordis_backend.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SignInResponse {
-    private Long id;
-
+public class FriendRequest {
+    @NotBlank
     private String userName;
-
-    private String email;
-
-    private String accessToken;
 }

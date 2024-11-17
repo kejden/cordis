@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
             return Optional.of(
                     SignInResponse.builder()
                             .id(user.getId())
-                            .name(user.getName())
+                            .userName(user.getUserName())
                             .email(dto.getEmail())
                             .accessToken(jwtService.generateToken(dto.getEmail()))
                             .build()
