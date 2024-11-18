@@ -37,8 +37,11 @@ public class UserServiceImpl implements UserService {
             return Optional.empty();
         }
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
-        UserEntity user = mapper.mapFrom(dto); // TODO maper nie mapuje emaila ?
-        user.setEmail(dto.getEmail());
+        UserEntity user = UserEntity.builder()
+                .password(dto.getPassword())
+                .email(dto.getEmail())
+                .userName(dto.getUserName())
+                .build();
         UserEntity savedUser = userRepository.save(user);
         return Optional.of(mapper.mapTo(savedUser));
 

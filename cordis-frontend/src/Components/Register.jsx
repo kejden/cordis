@@ -14,9 +14,10 @@ const Register = () => {
         e.preventDefault();
 
         if(!(user.confirmpassword === user.confirmpassword)) {
-            console.error("hasla nie sa takie same")
+            return;
         }
-        console.log(`name: ${user.username}, email ${user.email}, password ${user.password}, confirmpassword: ${user.confirmpassword}`);
+
+        // console.log(`name: ${user.username}, email ${user.email}, password ${user.password}, confirmpassword: ${user.confirmpassword}`);
         const response = await fetch("http://localhost:8080/auth/sign-up", {
             method: "POST",
             headers: {
@@ -26,7 +27,7 @@ const Register = () => {
                 id: 0,
                 email: user.email,
                 password: user.password,
-                name: user.username
+                userName: user.username
             }),
         });
 

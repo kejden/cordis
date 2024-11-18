@@ -43,10 +43,11 @@ public class FriendServiceImpl implements FriendService {
         List<FriendEntity> requestList = user.getRequestList();
 
         List<FriendResponse> result = responseList.stream()
+                .filter(f -> f.getFriendState().equals(FriendState.ACCEPT))
                 .map(this::convertRequestFriend)
                 .collect(Collectors.toList());
         List<FriendResponse> send = requestList.stream()
-                .filter(f -> !f.getFriendState().equals(FriendState.BAN))
+                .filter(f -> f.getFriendState().equals(FriendState.ACCEPT))
                 .map(this::convertResponseFriend)
                 .collect(Collectors.toList());
         result.addAll(send);
