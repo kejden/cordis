@@ -7,7 +7,7 @@ import io.ndk.cordis_backend.dto.response.SignInResponse;
 import java.util.Optional;
 
 public interface UserService {
-    Optional<AccountSignUp> signUp(AccountSignUp dto);
+    AccountSignUp signUp(AccountSignUp dto);
 
-    Optional<SignInResponse> signIn(SignInRequest dto);
+    SignInResponse signIn(SignInRequest dto);
 }

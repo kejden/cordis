@@ -14,7 +14,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class AccountSignUp {
-    private Long id;
 
     @NotBlank
     @Email

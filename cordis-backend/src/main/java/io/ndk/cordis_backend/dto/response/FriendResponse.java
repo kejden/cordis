@@ -1,6 +1,5 @@
 package io.ndk.cordis_backend.dto.response;
 
-import io.ndk.cordis_backend.enums.FriendState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -5,6 +5,8 @@ import io.ndk.cordis_backend.dto.request.AccountSignUp;
 import io.ndk.cordis_backend.dto.request.SignInRequest;
 import io.ndk.cordis_backend.dto.response.SignInResponse;
 import io.ndk.cordis_backend.entity.UserEntity;
+import io.ndk.cordis_backend.handler.BusinessErrorCodes;
+import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.JwtService;
 import io.ndk.cordis_backend.service.UserService;
@@ -31,11 +33,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Optional<AccountSignUp> signUp(AccountSignUp dto) {
-        Optional<UserEntity> userEntity = userRepository.findByEmail(dto.getEmail());
-        if(userEntity.isPresent()){
-            return Optional.empty();
-        }
+    public AccountSignUp signUp(AccountSignUp dto) {
+        userRepository.findByEmail(dto.getEmail()).ifPresent(user -> {throw new CustomException(BusinessErrorCodes.EMAIL_IS_USED);});
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         UserEntity user = UserEntity.builder()
                 .password(dto.getPassword())
@@ -43,29 +42,24 @@ public class UserServiceImpl implements UserService {
                 .userName(dto.getUserName())
                 .build();
         UserEntity savedUser = userRepository.save(user);
-        return Optional.of(mapper.mapTo(savedUser));
+        return mapper.mapTo(savedUser);
 
     }
 
     @Override
-    public Optional<SignInResponse> signIn(SignInRequest dto) {
-        Optional<UserEntity> userEntity = userRepository.findByEmail(dto.getEmail());
-        if(userEntity.isEmpty()){
-            return Optional.empty();
-        }
-        UserEntity user = userEntity.get();
+    public SignInResponse signIn(SignInRequest dto) {
+        UserEntity user = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
         if (authentication.isAuthenticated()) {
-            return Optional.of(
+            return
                     SignInResponse.builder()
                             .id(user.getId())
                             .userName(user.getUserName())
                             .email(dto.getEmail())
                             .accessToken(jwtService.generateToken(dto.getEmail()))
-                            .build()
-            );
+                            .build();
         } else {
-            return Optional.empty();
+            throw new CustomException(BusinessErrorCodes.BAD_CREDENTIALS);
         }
     }
 }
