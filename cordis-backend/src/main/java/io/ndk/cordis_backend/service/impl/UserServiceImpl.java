@@ -18,8 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -49,6 +47,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public SignInResponse signIn(SignInRequest dto) {
         UserEntity user = userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+//        if(!user.isEnabled())
+//            throw new MessagingException("account is not active");
+//
+//        if(user.isAccountLocked())
+//            throw new MessagingException("account is locked");
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
         if (authentication.isAuthenticated()) {
             return
