@@ -18,30 +18,21 @@ public class DirectMessageServiceImpl implements DirectMessageService {
 
     private final DirectMessageRepository messageRepository;
 
-    private String generateChannelId(Long user1, Long user2) {
-        String u1 = user1.toString();
-        String u2 = user2.toString();
-
-        return u1.compareTo(u2) < 0 ? u1 + "_" + u2 : u2 + "_" + u1;
-    }
 
     @Override
     public DirectMessageEntity saveMessage(DirectMessageRequest messageDto) {
-        String channelId = generateChannelId(messageDto.getSenderId(), messageDto.getReceiverId());
-
         DirectMessageEntity message = DirectMessageEntity.builder()
-                .senderId(messageDto.getSenderId())
-                .receiverId(messageDto.getReceiverId())
+                .sender(messageDto.getSender())
                 .content(messageDto.getContent())
                 .timestamp(LocalDateTime.now())
-                .channelId(channelId)
+                .channelId(messageDto.getChannelId())
                 .build();
 
         return messageRepository.save(message);
     }
 
     @Override
-    public Page<DirectMessageEntity> getMessages(String channelId, Pageable pageable) {
+    public Page<DirectMessageEntity> getMessages(Long channelId, Pageable pageable) {
         return messageRepository.findByChannelId(channelId, pageable);
     }
 }

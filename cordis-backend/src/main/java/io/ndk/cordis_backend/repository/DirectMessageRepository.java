@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DirectMessageRepository extends JpaRepository<DirectMessageEntity, Long> {
     @Query("SELECT m FROM DirectMessageEntity m WHERE m.channelId = :channelId ORDER BY m.timestamp ASC")
-    Page<DirectMessageEntity> findByChannelId(@Param("channelId") String channelId, Pageable pageable);
+    Page<DirectMessageEntity> findByChannelId(@Param("channelId") Long channelId, Pageable pageable);
 }

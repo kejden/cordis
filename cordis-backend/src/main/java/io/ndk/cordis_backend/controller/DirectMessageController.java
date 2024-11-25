@@ -4,11 +4,7 @@ import io.ndk.cordis_backend.dto.request.DirectMessageRequest;
 import io.ndk.cordis_backend.entity.DirectMessageEntity;
 import io.ndk.cordis_backend.service.DirectMessageService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -21,14 +17,14 @@ public class DirectMessageController {
 
     private final DirectMessageService messageService;
 
-    @GetMapping("/{channelId}/messages")
-    public ResponseEntity<Page<DirectMessageEntity>> getPaginatedMessages(
-            @PathVariable String channelId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").ascending());
-        Page<DirectMessageEntity> messages = messageService.getMessages(channelId, pageable);
-        return ResponseEntity.ok(messages);
+    @MessageMapping("/chat.sendMessage")
+    @SendTo("/topic/chat/{channelId}")
+    public DirectMessageEntity sendMessage(
+            @Payload DirectMessageRequest messageDto,
+            @DestinationVariable Long channelId) {
+        messageDto.setChannelId(channelId);
+        DirectMessageEntity savedMessage = messageService.saveMessage(messageDto);
+        return savedMessage;
     }
 
 }

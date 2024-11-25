@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface DirectMessageService {
     DirectMessageEntity saveMessage(DirectMessageRequest messageDto);
-    Page<DirectMessageEntity> getMessages(String channelId, Pageable pageable);
+    Page<DirectMessageEntity> getMessages(Long channelId, Pageable pageable);
 }

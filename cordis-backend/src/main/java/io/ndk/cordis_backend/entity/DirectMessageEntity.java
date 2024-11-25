@@ -15,14 +15,12 @@ import java.time.LocalDateTime;
 @Builder
 public class DirectMessageEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @JoinColumn(name = "sender_id", nullable = false)
-    private Long senderId;
-
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private Long receiverId;
+    @JoinColumn(name = "sender", nullable = false)
+    private String sender;
 
     @Column(nullable = false)
     private String content;
@@ -31,5 +29,5 @@ public class DirectMessageEntity {
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private String channelId;
+    private Long channelId;
 }

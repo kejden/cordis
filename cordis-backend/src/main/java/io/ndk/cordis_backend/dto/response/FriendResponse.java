@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class FriendResponse {
-
     private Long id;
     private Long userId;
     private String userName;
