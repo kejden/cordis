@@ -14,26 +14,19 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (user.password !== user.confirmpassword) {
-            console.error("Passwords do not match");
-            return;
-        }
-
         try {
             const response = await UserService.register({
-                id: 0,
                 email: user.email,
                 password: user.password,
                 userName: user.username,
             });
 
-            if (response?.success) {
-                navigate("/login");
-            } else {
-                console.error(response?.error || "Registration failed");
-            }
+            alert("Registration successful! You can now log in.");
+            navigate("/login");
         } catch (err) {
-            console.error("Error during registration:", err);
+            // Handle registration errors
+            console.error("Registration failed:", err);
+            alert(`Registration failed: ${err.message || err}`);
         }
     };
 

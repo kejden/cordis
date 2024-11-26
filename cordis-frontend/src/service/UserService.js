@@ -14,11 +14,18 @@ class UserService {
     }
 
     static async register(userData) {
-        console.log(userData);
-        const response = await axios.post(`${UserService.BASE_URL}/auth/sign-in`, userData, {
-            headers: { 'Content-Type': 'application/json' }
-        })
-        return response.data;
+        try {
+            const response = await axios.post(`${UserService.BASE_URL}/auth/sign-up`, userData, {
+                headers: {'Content-Type': 'application/json'},
+            });
+
+            // Return the created resource or success message
+            return response.data;
+        } catch (error) {
+            // Handle errors (e.g., validation or server issues)
+            console.error("Registration error:", error);
+            throw error.response?.data || error.message;
+        }
     }
 }
 
