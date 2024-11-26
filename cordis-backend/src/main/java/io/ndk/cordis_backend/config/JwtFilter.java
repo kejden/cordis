@@ -4,6 +4,7 @@ import io.ndk.cordis_backend.service.JwtService;
 import io.ndk.cordis_backend.service.impl.customUserDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -26,16 +27,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
         String token = null;
-        String username = null;
-        if(authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("jwt")) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
         }
 
         if(token != null){
             if(jwtService.validateJwtToken(token)){
-                username = jwtService.extractUserName(token);
+                String username = jwtService.extractUserName(token);
                 if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
                     if(jwtService.validateToken(token, userDetails)){

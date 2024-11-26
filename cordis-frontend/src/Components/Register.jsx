@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import UserService from "../service/UserService.js";
 
 const Register = () => {
     const [user, setUser] = useState({
@@ -13,32 +14,29 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if(!(user.confirmpassword === user.confirmpassword)) {
+        if (user.password !== user.confirmpassword) {
+            console.error("Passwords do not match");
             return;
         }
 
-        // console.log(`name: ${user.username}, email ${user.email}, password ${user.password}, confirmpassword: ${user.confirmpassword}`);
-        const response = await fetch("http://localhost:8080/auth/sign-up", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
+        try {
+            const response = await UserService.register({
                 id: 0,
                 email: user.email,
                 password: user.password,
-                userName: user.username
-            }),
-        });
+                userName: user.username,
+            });
 
-        // const data = await response.json();
-
-        if (response.ok) {
-            navigate("/login");
-        } else {
-            console.log(response.error);
+            if (response?.success) {
+                navigate("/login");
+            } else {
+                console.error(response?.error || "Registration failed");
+            }
+        } catch (err) {
+            console.error("Error during registration:", err);
         }
     };
+
 
     const onChange = (event) =>{
         const {name, value} = event.target;

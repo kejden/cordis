@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import UserService from "../service/UserService.js";
 
 const Login = () => {
     const [user, setUser] = useState({
@@ -12,28 +12,20 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const response = await fetch("http://localhost:8080/auth/sign-in", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: user.email,
-                password: user.password
-            }),
-        });
+        const response = await UserService.login(JSON.stringify({
+            email: user.email,
+            password: user.password
+        }))
 
-        const data = await response.json();
+        if (response && response.userName && response.email) {
+            localStorage.setItem("id", response.id);
+            localStorage.setItem("userName", response.userName);
+            localStorage.setItem("email", response.email);
 
-        if (response.ok) {
-            // console.log(data);
-            // localStorage.setItem("accessToken", data.accessToken);
-            localStorage.setItem("userName", data.userName);
-            localStorage.setItem("email", data.email);
-            navigate("/");
+            navigate("/friends");
             // alert("Login successful!");
         } else {
-            console.log(response.error);
+            console.error("Login failed. Unexpected response:", response);
         }
     };
 

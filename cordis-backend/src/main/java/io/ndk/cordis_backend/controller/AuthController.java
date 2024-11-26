@@ -2,6 +2,7 @@ package io.ndk.cordis_backend.controller;
 
 import io.ndk.cordis_backend.dto.request.AccountSignUp;
 import io.ndk.cordis_backend.dto.request.SignInRequest;
+import io.ndk.cordis_backend.dto.response.SignInResponse;
 import io.ndk.cordis_backend.service.CookieService;
 import io.ndk.cordis_backend.service.JwtService;
 import io.ndk.cordis_backend.service.UserService;
@@ -33,8 +34,9 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> singIn(@RequestBody @Valid SignInRequest dto, HttpServletResponse response) {
+        SignInResponse signInResponse = userService.signIn(dto);
         response.addCookie(cookieService.getNewCookie("jwt", jwtService.generateToken(dto.getEmail())));
-        return new ResponseEntity<>(userService.signIn(dto), HttpStatus.OK);
+        return new ResponseEntity<>(signInResponse, HttpStatus.OK);
     }
 
     @PostMapping("/logout")
