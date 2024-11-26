@@ -1,5 +1,6 @@
 package io.ndk.cordis_backend.entity;
 
+import io.ndk.cordis_backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,5 +32,8 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "sender",cascade = CascadeType.ALL)
     private List<FriendEntity> requestList = new ArrayList<>();
+
+    @Column(nullable = false)
+    private UserStatus status;
 
 }

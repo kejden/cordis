@@ -18,6 +18,7 @@ public enum BusinessErrorCodes {
     EMAIL_IS_USED(307, "Email is used", HttpStatus.BAD_REQUEST),
     NICKNAME_IS_USED(308, "Nick name is used", HttpStatus.BAD_REQUEST),
     NO_SUCH_ID(309, "There is no user with that ID", HttpStatus.BAD_REQUEST),
+    BAD_COOKIE(310, "Provided cookie is incorrect", HttpStatus.BAD_REQUEST),
 //    USER_IS_ENABLE(310, "User is already activated", HttpStatus.BAD_REQUEST),
     ;
 

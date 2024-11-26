@@ -5,6 +5,7 @@ import io.ndk.cordis_backend.dto.request.AccountSignUp;
 import io.ndk.cordis_backend.dto.request.SignInRequest;
 import io.ndk.cordis_backend.dto.response.SignInResponse;
 import io.ndk.cordis_backend.entity.UserEntity;
+import io.ndk.cordis_backend.enums.UserStatus;
 import io.ndk.cordis_backend.handler.BusinessErrorCodes;
 import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.repository.UserRepository;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
                 .password(dto.getPassword())
                 .email(dto.getEmail())
                 .userName(dto.getUserName())
+                .status(UserStatus.OFFLINE)
                 .build();
         UserEntity savedUser = userRepository.save(user);
         return mapper.mapTo(savedUser);
@@ -52,7 +54,8 @@ public class UserServiceImpl implements UserService {
 //
 //        if(user.isAccountLocked())
 //            throw new MessagingException("account is locked");
-
+        user.setStatus(UserStatus.ONLINE);
+        userRepository.save(user);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
         if (authentication.isAuthenticated()) {
             return
@@ -60,10 +63,16 @@ public class UserServiceImpl implements UserService {
                             .id(user.getId())
                             .userName(user.getUserName())
                             .email(dto.getEmail())
-                            .accessToken(jwtService.generateToken(dto.getEmail()))
                             .build();
         } else {
             throw new CustomException(BusinessErrorCodes.BAD_CREDENTIALS);
         }
+    }
+
+    @Override
+    public void logout(String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+        user.setStatus(UserStatus.OFFLINE);
+        userRepository.save(user);
     }
 }

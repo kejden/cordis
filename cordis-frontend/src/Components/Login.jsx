@@ -27,7 +27,7 @@ const Login = () => {
 
         if (response.ok) {
             // console.log(data);
-            localStorage.setItem("accessToken", data.accessToken);
+            // localStorage.setItem("accessToken", data.accessToken);
             localStorage.setItem("userName", data.userName);
             localStorage.setItem("email", data.email);
             navigate("/");

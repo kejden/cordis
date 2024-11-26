@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface UserService {
     AccountSignUp signUp(AccountSignUp dto);
-
     SignInResponse signIn(SignInRequest dto);
+    void logout(String email);
 }
