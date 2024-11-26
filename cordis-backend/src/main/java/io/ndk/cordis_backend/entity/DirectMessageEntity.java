@@ -22,6 +22,9 @@ public class DirectMessageEntity {
     @JoinColumn(name = "sender", nullable = false)
     private String sender;
 
+    @JoinColumn(name = "receiver", nullable = false)
+    private String receiver;
+
     @Column(nullable = false)
     private String content;
 

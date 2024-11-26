@@ -8,8 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface DirectMessageRepository extends JpaRepository<DirectMessageEntity, Long> {
     @Query("SELECT m FROM DirectMessageEntity m WHERE m.channelId = :channelId ORDER BY m.timestamp ASC")
     Page<DirectMessageEntity> findByChannelId(@Param("channelId") Long channelId, Pageable pageable);
+    List<DirectMessageEntity> findByChannelId(Long channelId);
 }

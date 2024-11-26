@@ -13,15 +13,15 @@ import org.springframework.stereotype.Controller;
 @Controller
 @AllArgsConstructor
 public class DirectMessageWebSocketController {
-
-    private final DirectMessageService messageService;
-
-    @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/chat/{channelId}")
-    public DirectMessageEntity sendMessage(
-            @Payload DirectMessageRequest messageDto,
-            @DestinationVariable Long channelId) {
-        DirectMessageEntity savedMessage = messageService.saveMessage(messageDto);
-        return savedMessage;
-    }
+//
+//    private final DirectMessageService messageService;
+//
+//    @MessageMapping("/chat.sendMessage")
+//    @SendTo("/topic/chat/{channelId}")
+//    public DirectMessageEntity sendMessage(
+//            @Payload DirectMessageRequest messageDto,
+//            @DestinationVariable Long channelId) {
+//        DirectMessageEntity savedMessage = messageService.saveMessage(messageDto);
+//        return savedMessage;
+//    }
 }

@@ -9,33 +9,51 @@ const ChatWindow = ({ friend, onClose }) => {
     const [newMessage, setNewMessage] = useState("");
     const [stompClient, setStompClient] = useState(null);
 
+    const onConnected = () => {
+        client.subscribe(`/user/${friend.userName}/queue/messages`, onMessageReceived);
+        client.subscribe(`/user/${friend.userName}/queue/messages`, onMessageReceived);
+
+    }
+
+    const onError = (e) => {
+
+    }
+
+    const onMessageReceived = () => {
+
+    }
+
     useEffect(() => {
         const socket = new SockJS("http://localhost:8080/ws");
         const client = Stomp.over(socket);
 
-        client.connect({}, () => {
-            const subscriptionPath = `/topic/chat/${friend.id}`;
-            client.subscribe(subscriptionPath, (message) => {
-                const receivedMessage = JSON.parse(message.body);
-                setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-            });
-        });
+        client.connect({}, onConnected, onError);
 
-        setStompClient(client);
 
-        return () => {
-            if (client) {
-                client.disconnect();
-            }
-        };
-    }, [friend.id]); // Reactively update on `friend.id`
+        // client.connect({}, () => {
+        //     const subscriptionPath = `/topic/chat/${friend.id}`;
+        //     client.subscribe(subscriptionPath, (message) => {
+        //         const receivedMessage = JSON.parse(message.body);
+        //         setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+        //     });
+        // });
+        //
+        // setStompClient(client);
+        //
+        // return () => {
+        //     if (client) {
+        //         client.disconnect();
+        //     }
+        // };
+    }, [friend.id]);
 
     const handleSendMessage = () => {
         if (newMessage.trim() !== "" && stompClient) {
             const messagePayload = {
                 sender: senderName,
+                receiver: friend.userName,
                 content: newMessage,
-                channelId: friend.id, // Include channelId in payload
+                channelId: friend.id,
             };
 
             stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(messagePayload));
