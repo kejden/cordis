@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DirectMessageResponse {
+public class MessageResponse {
     private Long id;
     private Long channelId;
     private String sender;

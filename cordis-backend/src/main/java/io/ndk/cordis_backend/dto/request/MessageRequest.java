@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DirectMessageRequest {
+public class MessageRequest {
     private Long channelId;
     private String sender;
     private String receiver;

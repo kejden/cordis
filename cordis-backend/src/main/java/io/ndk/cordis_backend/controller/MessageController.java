@@ -1,8 +1,8 @@
 package io.ndk.cordis_backend.controller;
 
-import io.ndk.cordis_backend.dto.request.DirectMessageRequest;
-import io.ndk.cordis_backend.dto.response.DirectMessageResponse;
-import io.ndk.cordis_backend.service.DirectMessageService;
+import io.ndk.cordis_backend.dto.request.MessageRequest;
+import io.ndk.cordis_backend.dto.response.MessageResponse;
+import io.ndk.cordis_backend.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +13,13 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/messages")
 @AllArgsConstructor
-public class DirectMessageController {
+public class MessageController {
 
-    private final DirectMessageService messageService;
+    private final MessageService messageService;
 
     @PostMapping("/create")
-    public ResponseEntity<DirectMessageResponse> create(@Valid @RequestBody DirectMessageRequest directMessageRequest) {
-        DirectMessageResponse dm = messageService.saveMessage(directMessageRequest);
+    public ResponseEntity<MessageResponse> create(@Valid @RequestBody MessageRequest directMessageRequest) {
+        MessageResponse dm = messageService.saveMessage(directMessageRequest);
         return new ResponseEntity<>(dm, HttpStatus.OK);
     }
 
