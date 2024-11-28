@@ -19,10 +19,8 @@ class UserService {
                 headers: {'Content-Type': 'application/json'},
             });
 
-            // Return the created resource or success message
             return response.data;
         } catch (error) {
-            // Handle errors (e.g., validation or server issues)
             console.error("Registration error:", error);
             throw error.response?.data || error.message;
         }
