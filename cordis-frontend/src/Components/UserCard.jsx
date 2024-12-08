@@ -1,11 +1,16 @@
 import pfp from "../assets/img/pfp.jpg";
 import { BiCog } from "react-icons/bi";
+import {useDispatch} from "react-redux";
+// import {logoutAction} from "../Redux/Auth/Action.js";
 
 const UserCard = () => {
     const userName = localStorage.getItem("userName");
+    // const dispatch = useDispatch();
 
     function userProfileEdit() {
         // todo
+
+        // dispatch(logoutAction())
         console.log("userProfileEdit");
     }
 

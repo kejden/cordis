@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import UserService from "../service/UserService.js";
+import { useDispatch } from "react-redux";
+import {login} from "../Redux/Auth/Action.js";
+
 
 const Login = () => {
     const [user, setUser] = useState({
@@ -8,25 +10,12 @@ const Login = () => {
         password: ""
     });
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const response = await UserService.login(JSON.stringify({
-            email: user.email,
-            password: user.password
-        }))
-
-        if (response && response.userName && response.email) {
-            localStorage.setItem("id", response.id);
-            localStorage.setItem("userName", response.userName);
-            localStorage.setItem("email", response.email);
-
-            navigate("/friends");
-            // alert("Login successful!");
-        } else {
-            console.error("Login failed. Unexpected response:", response);
-        }
+        dispatch(login(user));
+        navigate("/friends");
     };
 
     const onChange = (event) =>{

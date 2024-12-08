@@ -1,10 +1,12 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import UserService from "../service/UserService.js";
+import { useDispatch } from "react-redux";
+import { register } from "../Redux/Auth/Action";
 
 const Register = () => {
+    const dispatch = useDispatch();
     const [user, setUser] = useState({
-        username: "",
+        userName: "",
         email: "",
         password: "",
         confirmpassword: ""
@@ -15,16 +17,11 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await UserService.register({
-                email: user.email,
-                password: user.password,
-                userName: user.username,
-            });
+            dispatch(register(user));
 
             alert("Registration successful! You can now log in.");
             navigate("/login");
         } catch (err) {
-            // Handle registration errors
             console.error("Registration failed:", err);
             alert(`Registration failed: ${err.message || err}`);
         }
