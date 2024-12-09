@@ -6,11 +6,16 @@ import Home from "./Components/Home.jsx";
 import FriendManager from "./Components/FriendManager.jsx";
 import ServerBar from "./Components/ServerBar.jsx";
 import React from "react";
+import {Toaster} from "react-hot-toast";
 
 
 function App() {
     return (
         <>
+            <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
             <ServerBar />
             <Routes>
                 <Route path="/h" component={<Home />} />

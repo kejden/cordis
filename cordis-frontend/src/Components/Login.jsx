@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {login} from "../Redux/Auth/Action.js";
+import toast from "react-hot-toast";
 
 
 const Login = () => {
@@ -14,8 +15,14 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        dispatch(login(user));
-        navigate("/friends");
+        dispatch(login(user))
+            .then(() => {
+                navigate("/friends");
+                toast.success("You have logged in successfully.");
+            })
+            .catch(() => {
+                toast.error("Failed to login. Please try again.");
+            })
     };
 
     const onChange = (event) =>{

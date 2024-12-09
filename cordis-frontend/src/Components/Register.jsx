@@ -2,6 +2,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { register } from "../Redux/Auth/Action";
+import toast from "react-hot-toast";
 
 const Register = () => {
     const dispatch = useDispatch();
@@ -15,16 +16,15 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        dispatch(register(user))
+            .then(() => {
+                navigate("/login");
+                toast.success("You have registered successfully.");
+            })
+            .catch(() => {
+                toast.error("Failed to register. Please try again.");
+            })
 
-        try {
-            dispatch(register(user));
-
-            alert("Registration successful! You can now log in.");
-            navigate("/login");
-        } catch (err) {
-            console.error("Registration failed:", err);
-            alert(`Registration failed: ${err.message || err}`);
-        }
     };
 
 
