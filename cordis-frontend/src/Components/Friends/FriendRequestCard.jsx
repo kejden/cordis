@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
-import pfp from '../assets/img/pfp.jpg'
+import pfp from '../../assets/img/pfp.jpg'
 import {BsChatFill} from "react-icons/bs";
 import {SlOptionsVertical} from "react-icons/sl";
-import ChatWindow from "./ChatWindow";
+import ChatWindow from "../Chat/ChatWindow.jsx";
 
 const FriendRequestCard = ({ friend, onAccept, onRefuse }) => {
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -14,7 +14,6 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse }) => {
     const handleCloseChat = () => {
         setIsChatOpen(false);
     };
-
 
     return (
         <>
@@ -72,7 +71,7 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse }) => {
                 </div>) }
             </div>
 
-            {isChatOpen && <ChatWindow friend={friend} onClose={handleCloseChat} />}
+            {/*{isChatOpen && <ChatWindow friend={friend} onClose={handleCloseChat} />}*/}
         </>
     );
 };

@@ -1,11 +1,12 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { register } from "../Redux/Auth/Action";
+import {useDispatch, useSelector} from "react-redux";
+import { register } from "../../Redux/Auth/Action.js";
 import toast from "react-hot-toast";
 
 const Register = () => {
     const dispatch = useDispatch();
+    const { auth } = useSelector((store) => store);
     const [user, setUser] = useState({
         userName: "",
         email: "",
@@ -27,11 +28,16 @@ const Register = () => {
 
     };
 
-
     const onChange = (event) =>{
         const {name, value} = event.target;
         setUser({...user, [name]: value});
     }
+
+    useEffect(() => {
+        if (auth.reqUser?.userName) {
+            navigate("/");
+        }
+    }, [auth.reqUser, navigate]);
 
 
     return (

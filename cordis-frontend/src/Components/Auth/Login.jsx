@@ -1,11 +1,12 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import {login} from "../Redux/Auth/Action.js";
+import {useDispatch, useSelector} from "react-redux";
+import {login} from "../../Redux/Auth/Action.js";
 import toast from "react-hot-toast";
 
 
 const Login = () => {
+    const { auth } = useSelector((store) => store);
     const [user, setUser] = useState({
         email: "",
         password: ""
@@ -17,7 +18,7 @@ const Login = () => {
         e.preventDefault();
         dispatch(login(user))
             .then(() => {
-                navigate("/friends");
+                navigate("/");
                 toast.success("You have logged in successfully.");
             })
             .catch(() => {
@@ -30,6 +31,11 @@ const Login = () => {
         setUser({...user, [name]: value});
     }
 
+    useEffect(() => {
+        if (auth.reqUser?.userName) {
+            navigate("/");
+        }
+    }, [auth.reqUser, navigate]);
 
     return (
         <>

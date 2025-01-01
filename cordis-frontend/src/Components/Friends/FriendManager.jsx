@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import FriendRequestCard from "./FriendRequestCard"; // Import komponentu karty zaproszenia znajomego
+import FriendRequestCard from "./FriendRequestCard.jsx";
 import { FaUserFriends } from "react-icons/fa";
-import ServerBar from "./ServerBar.jsx";
-import UserCard from "./UserCard.jsx";
+import ServerBar from "../ServerBar/ServerBar.jsx";
+import UserCard from "../User/UserCard.jsx";
 
 
 const FriendManager = () => {
@@ -11,7 +11,7 @@ const FriendManager = () => {
     const [pendingFriends, setPendingFriends] = useState([]);
     const [newFriendUsername, setNewFriendUsername] = useState("");
     const [error, setError] = useState("");
-    const [activeSection, setActiveSection] = useState("friends"); // Dodajemy stan dla aktywnej sekcji
+    const [activeSection, setActiveSection] = useState("friends");
 
     useEffect(() => {
         fetchAcceptedFriends();
