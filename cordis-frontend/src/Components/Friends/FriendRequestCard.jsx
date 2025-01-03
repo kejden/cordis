@@ -2,19 +2,8 @@ import React, {useEffect, useState} from "react";
 import pfp from '../../assets/img/pfp.jpg'
 import {BsChatFill} from "react-icons/bs";
 import {SlOptionsVertical} from "react-icons/sl";
-import ChatWindow from "../Chat/ChatWindow.jsx";
 
-const FriendRequestCard = ({ friend, onAccept, onRefuse }) => {
-    const [isChatOpen, setIsChatOpen] = useState(false);
-
-    const handleOpenChat = () => {
-        setIsChatOpen(true);
-    };
-
-    const handleCloseChat = () => {
-        setIsChatOpen(false);
-    };
-
+const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWindow }) => {
     return (
         <>
             <div
@@ -57,7 +46,12 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse }) => {
                 </div>
                 {!onAccept && (<div className="flex items-center float-end space-x-2">
                     <div className="rounded-full  inline-block bg-gray-700 hover:bg-gray-900"
-                        onClick={handleOpenChat}
+                        onClick={
+                            () => {
+                                setChatOpen(true)
+                                setChatWindow(friend.id)
+                            }
+                        }
                     >
                         <BsChatFill className="text-xl m-2.5" />
                     </div>
@@ -70,8 +64,6 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse }) => {
 
                 </div>) }
             </div>
-
-            {/*{isChatOpen && <ChatWindow friend={friend} onClose={handleCloseChat} />}*/}
         </>
     );
 };
