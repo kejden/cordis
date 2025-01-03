@@ -1,5 +1,6 @@
 package io.ndk.cordis_backend.dto.response;
 
+import io.ndk.cordis_backend.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 public class MessageResponse {
     private Long id;
-    private Long channelId;
+    private Long chatId;
     private String sender;
-    private String receiver;
     private String content;
     private LocalDateTime sendAt;
 }

@@ -19,11 +19,9 @@ public class DirectMessageEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender", nullable = false)
-    private String sender;
-
-    @JoinColumn(name = "receiver", nullable = false)
-    private String receiver;
+    private UserEntity sender;
 
     @Column(nullable = false)
     private String content;
@@ -32,5 +30,5 @@ public class DirectMessageEntity {
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private Long channelId;
+    private Long chatId;
 }

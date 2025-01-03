@@ -13,7 +13,7 @@ public class RealTImeChat {
     @MessageMapping("/message")
     @SendTo("/group/public")
     public DirectMessageEntity receiveMessage(@Payload DirectMessageEntity message) {
-        template.convertAndSend("/group"+message.getChannelId(), message);
+        template.convertAndSend("/group"+message.getChatId(), message);
         return message;
     }
 }

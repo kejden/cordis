@@ -1,46 +1,32 @@
 import {BASE_API_URL} from "../../config/api.js";
 import { CREATE_NEW_MESSAGE, GET_ALL_MESSAGE } from "./ActionType.js";
+import axios from "axios";
 
-export const createMessage = (messageData) => async (dispatch) => {
+export const createMessage = (data) => async (dispatch) => {
     try {
-        const res = await fetch(`${BASE_API_URL}/api/messages/create`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${messageData.token}`,
-            },
-            body: JSON.stringify(messageData.data),
-        });
+        const res = await axios.post(
+            `${BASE_API_URL}/api/messages/create`, data, {withCredentials: true,}
+        );
 
-        const data = await res.json();
-        console.log("create message ", data);
+        console.log("create message ", res.data);
 
-        // Dispatch an action with the created message data
-        dispatch({ type: CREATE_NEW_MESSAGE, payload: data });
+        dispatch({ type: CREATE_NEW_MESSAGE, payload: res.data });
     } catch (error) {
-        console.log("catch error ", error);
+        console.error("Error while creating message: ", error.response || error);
     }
 };
 
-// Action creator for getting all messages for a chat
 export const getAllMessages = (reqData) => async (dispatch) => {
     console.log("Came inside get all messages");
-
     try {
-        const res = await fetch(`${BASE_API_URL}/api/messages/${reqData.chatId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${reqData.token}`,
-            },
-        });
+        const res = await axios.get(
+            `${BASE_API_URL}/api/messages/${reqData.chatId}`, {withCredentials: true,}
+        );
 
-        const data = await res.json();
-        console.log("get all messages from action method", data);
+        console.log("get all messages from action method", res.data);
 
-        // Dispatch an action with the fetched messages data
-        dispatch({ type: GET_ALL_MESSAGE, payload: data });
+        dispatch({ type: GET_ALL_MESSAGE, payload: res.data });
     } catch (error) {
-        console.log("catch error ", error);
+        console.error("Error while fetching messages: ", error.response || error);
     }
 };

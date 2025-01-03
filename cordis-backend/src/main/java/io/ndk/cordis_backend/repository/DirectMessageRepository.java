@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface DirectMessageRepository extends JpaRepository<DirectMessageEntity, Long> {
-    @Query("SELECT m FROM DirectMessageEntity m WHERE m.channelId = :channelId ORDER BY m.timestamp ASC")
-    Page<DirectMessageEntity> findByChannelId(@Param("channelId") Long channelId, Pageable pageable);
-    List<DirectMessageEntity> findByChannelId(Long channelId);
+    @Query("SELECT m FROM DirectMessageEntity m WHERE m.chatId = :chatId ORDER BY m.timestamp ASC")
+    Page<DirectMessageEntity> findByChannelId(@Param("chatId") Long chatId, Pageable pageable);
+    List<DirectMessageEntity> findByChatId(Long chatId);
 }

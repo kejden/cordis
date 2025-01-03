@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -18,8 +19,8 @@ public class MessageController {
     private final MessageService messageService;
 
     @PostMapping("/create")
-    public ResponseEntity<MessageResponse> create(@Valid @RequestBody MessageRequest directMessageRequest) {
-        MessageResponse dm = messageService.saveMessage(directMessageRequest);
+    public ResponseEntity<MessageResponse> create(@Valid @RequestBody MessageRequest directMessageRequest, Principal principal) {
+        MessageResponse dm = messageService.saveMessage(directMessageRequest, principal.getName());
         return new ResponseEntity<>(dm, HttpStatus.OK);
     }
 

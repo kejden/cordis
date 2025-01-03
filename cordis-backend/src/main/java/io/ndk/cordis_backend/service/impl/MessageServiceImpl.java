@@ -4,7 +4,11 @@ import io.ndk.cordis_backend.Mappers.Mapper;
 import io.ndk.cordis_backend.dto.request.MessageRequest;
 import io.ndk.cordis_backend.dto.response.MessageResponse;
 import io.ndk.cordis_backend.entity.DirectMessageEntity;
+import io.ndk.cordis_backend.entity.UserEntity;
+import io.ndk.cordis_backend.handler.BusinessErrorCodes;
+import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.repository.DirectMessageRepository;
+import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,26 +26,25 @@ public class MessageServiceImpl implements MessageService {
 
     private final DirectMessageRepository messageRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
     private final Mapper<DirectMessageEntity, MessageResponse> mapper;
 
     @Override
-    public MessageResponse saveMessage(MessageRequest messageDto) {
+    public MessageResponse saveMessage(MessageRequest messageDto, String email) {
         DirectMessageEntity message = DirectMessageEntity.builder()
-                .sender(messageDto.getSender())
-                .receiver(messageDto.getReceiver())
                 .content(messageDto.getContent())
+                .sender(getUser(email))
                 .timestamp(LocalDateTime.now())
-                .channelId(messageDto.getChannelId())
+                .chatId(messageDto.getChatId())
                 .build();
         DirectMessageEntity savedMessage = messageRepository.save(message);
-        messagingTemplate.convertAndSend("/user/" + message.getChannelId(), savedMessage);
-        MessageResponse messageResponse = new MessageResponse().builder()
+        messagingTemplate.convertAndSend("/user/" + message.getChatId(), savedMessage);
+        MessageResponse messageResponse = MessageResponse.builder()
                 .id(savedMessage.getId())
-                .sender(savedMessage.getSender())
-                .receiver(savedMessage.getReceiver())
                 .content(savedMessage.getContent())
-                .channelId(savedMessage.getChannelId())
                 .sendAt(savedMessage.getTimestamp())
+                .chatId(savedMessage.getChatId())
+                .sender(savedMessage.getSender().getUserName())
                 .build();
         return messageResponse;
     }
@@ -52,9 +55,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<MessageResponse> getMessages(Long channelId) {
-        return messageRepository.findByChannelId(channelId).stream().map(mapper::mapTo).collect(Collectors.toList());
+    public List<MessageResponse> getMessages(Long chatId) {
+        return messageRepository.findByChatId(chatId).stream().map(mapper::mapTo).collect(Collectors.toList());
     }
 
+    private UserEntity getUser(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+    }
 
 }
