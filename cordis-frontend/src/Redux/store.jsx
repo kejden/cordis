@@ -3,14 +3,13 @@ import { thunk } from "redux-thunk";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // Default is localStorage for web
 import { authReducer } from "./Auth/Reducer";
-// import { chatReducer } from "./Chat/Reducer";
-// import { messageReducer } from "./Message/Reducer";
+import { messageReducer } from "./Message/Reducer";
 
 // Combine multiple reducers into a single rootReducer
 const rootReducer = combineReducers({
     auth: authReducer, // Authentication related state
     // chat: chatReducer, // Chat related state
-    // message: messageReducer, // Message related state
+    message: messageReducer, // Message related state
 });
 
 // Configuration for redux-persist

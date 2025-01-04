@@ -24,8 +24,8 @@ public class JwtServiceImpl implements JwtService {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
             SecretKey sk = keyGen.generateKey();
-            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-            System.out.println(secretKey);
+//            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+            secretKey = "FKuIW2kY4nNmiFlXQzTOS6qwCvRQ5FZHoxDpiJNBKcRYAJaZnhHHP7AjVQV0cG0a";
         }catch(NoSuchAlgorithmException e){
             throw new RuntimeException(e);
         }

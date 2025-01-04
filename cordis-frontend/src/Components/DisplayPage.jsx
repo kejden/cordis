@@ -9,7 +9,7 @@ import {createMessage, getAllMessages} from "../Redux/Message/Action.js";
 import ChatWindow from "./Chat/ChatWindow.jsx";
 
 const DisplayPage = () => {
-    const { auth, message = {}} = useSelector((store) => store);
+    const { auth, message = []} = useSelector((store) => store);
     const [chatOpen, setChatOpen] = useState(false);
     const [chatWindow, setChatWindow] = useState(null);
     const [stompClient, setStompClient] = useState(null);
@@ -19,12 +19,11 @@ const DisplayPage = () => {
     const [content, setContent] = useState("");
     const dispatch = useDispatch();
 
-
     useEffect(() => {
-        if(chatOpen !== false) {
-            console.log(chatWindow)
+        if (chatWindow) {
+            dispatch(getAllMessages({ chatId: chatWindow }));
         }
-    }, [chatOpen])
+    }, [chatWindow]);
 
     const connect = () => {
         const sock = new SockJs("http://localhost:8080/ws");
@@ -55,8 +54,18 @@ const DisplayPage = () => {
     };
 
     const onMessageReceive = (payload) => {
-        const receivedMessage = JSON.parse(payload.body);
-        setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+        try {
+            const receivedMessage = JSON.parse(payload.body);
+            setMessages((prevMessages) => {
+                if (!Array.isArray(prevMessages)) {
+                    console.error("prevMessages is not an array:", prevMessages);
+                    return [receivedMessage];
+                }
+                return [...prevMessages, receivedMessage];
+            });
+        } catch (error) {
+            console.error("Error parsing message payload:", error);
+        }
     };
 
     useEffect(() => {
@@ -73,7 +82,7 @@ const DisplayPage = () => {
 
     useEffect(() => {
         if (message?.messages) {
-            setMessages(message.messages);
+            setMessages(Array.isArray(message.messages) ? message.messages : []);
         }
     }, [message?.messages]);
 
@@ -84,8 +93,6 @@ const DisplayPage = () => {
     }, [chatWindow, message.newMessage]);
 
     const handleCreateNewMessage = (content) => {
-        // console.log(auth);
-        // console.log("chatId:"+ chatWindow +" content: " + content + " userId: " + auth.signin.id);
         dispatch(
             createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id })
         );

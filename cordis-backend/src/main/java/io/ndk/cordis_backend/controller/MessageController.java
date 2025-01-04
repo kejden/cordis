@@ -25,7 +25,7 @@ public class MessageController {
     }
 
     // TODO change implementation from List to Page
-    @GetMapping("/messages/{channelId}")
+    @GetMapping("/{channelId}")
     public ResponseEntity<?> getMessages(@PathVariable Long channelId){
         return new ResponseEntity<>(messageService.getMessages(channelId), HttpStatus.OK);
     }
