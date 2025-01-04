@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface MessageService {
-    MessageResponse saveMessage(MessageRequest messageDto, String email);
+    MessageResponse saveMessage(MessageRequest messageDto);
     Page<MessageResponse> getMessages(Long chatId, Pageable pageable);
     List<MessageResponse> getMessages(Long chatId);
 }

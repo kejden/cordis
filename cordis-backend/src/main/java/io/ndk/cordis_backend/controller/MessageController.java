@@ -19,8 +19,8 @@ public class MessageController {
     private final MessageService messageService;
 
     @PostMapping("/create")
-    public ResponseEntity<MessageResponse> create(@Valid @RequestBody MessageRequest directMessageRequest, Principal principal) {
-        MessageResponse dm = messageService.saveMessage(directMessageRequest, principal.getName());
+    public ResponseEntity<MessageResponse> create(@Valid @RequestBody MessageRequest directMessageRequest) {
+        MessageResponse dm = messageService.saveMessage(directMessageRequest);
         return new ResponseEntity<>(dm, HttpStatus.OK);
     }
 

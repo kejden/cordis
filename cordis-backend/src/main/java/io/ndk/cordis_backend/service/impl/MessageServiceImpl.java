@@ -30,10 +30,10 @@ public class MessageServiceImpl implements MessageService {
     private final Mapper<DirectMessageEntity, MessageResponse> mapper;
 
     @Override
-    public MessageResponse saveMessage(MessageRequest messageDto, String email) {
+    public MessageResponse saveMessage(MessageRequest messageDto) {
         DirectMessageEntity message = DirectMessageEntity.builder()
                 .content(messageDto.getContent())
-                .sender(getUser(email))
+                .sender(getUser(messageDto.getUserId()))
                 .timestamp(LocalDateTime.now())
                 .chatId(messageDto.getChatId())
                 .build();
@@ -59,8 +59,8 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findByChatId(chatId).stream().map(mapper::mapTo).collect(Collectors.toList());
     }
 
-    private UserEntity getUser(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+    private UserEntity getUser(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
     }
 
 }

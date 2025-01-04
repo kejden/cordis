@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,13 +32,14 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests( auth -> auth
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -51,11 +53,11 @@ public class SecurityConfig {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration cfg = new CorsConfiguration();
-                cfg.setAllowedOrigins(Arrays.asList(
-                        "http://localhost:3000",
-                        "http://localhost:5173",
-                        "http://localhost:5174"
-                ));
+//                cfg.setAllowedOrigins(Arrays.asList(
+//                        "http://localhost:3000",
+//                        "http://localhost:5173",
+//                        "http://localhost:5174"
+//                ));
                 cfg.setAllowedOriginPatterns(Arrays.asList(
                         "http://localhost:3000",
                         "http://localhost:5173",
@@ -70,6 +72,7 @@ public class SecurityConfig {
             }
         };
     }
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

@@ -1,5 +1,6 @@
 package io.ndk.cordis_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.ndk.cordis_backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,9 +28,11 @@ public class UserEntity {
     @Column(nullable = false, length = 15)
     private String userName;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "receiver",cascade = CascadeType.ALL)
     private List<FriendEntity> responseList = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sender",cascade = CascadeType.ALL)
     private List<FriendEntity> requestList = new ArrayList<>();
 
