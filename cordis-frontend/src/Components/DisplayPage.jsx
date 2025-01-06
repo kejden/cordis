@@ -9,7 +9,7 @@ import {createMessage, getAllMessages} from "../Redux/Message/Action.js";
 import ChatWindow from "./Chat/ChatWindow.jsx";
 
 const DisplayPage = () => {
-    const { auth, message = []} = useSelector((store) => store);
+    const { auth, message} = useSelector((store) => store);
     const [chatOpen, setChatOpen] = useState(false);
     const [chatWindow, setChatWindow] = useState(null);
     const [stompClient, setStompClient] = useState(null);
@@ -97,6 +97,7 @@ const DisplayPage = () => {
             createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id })
         );
         setContent("");
+        console.log(message.newMessage);
     };
 
     return (

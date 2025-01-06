@@ -38,14 +38,8 @@ public class MessageServiceImpl implements MessageService {
                 .chatId(messageDto.getChatId())
                 .build();
         DirectMessageEntity savedMessage = messageRepository.save(message);
-        messagingTemplate.convertAndSend("/user/" + message.getChatId(), savedMessage);
-        MessageResponse messageResponse = MessageResponse.builder()
-                .id(savedMessage.getId())
-                .content(savedMessage.getContent())
-                .sendAt(savedMessage.getTimestamp())
-                .chatId(savedMessage.getChatId())
-                .sender(savedMessage.getSender().getUserName())
-                .build();
+        MessageResponse messageResponse = mapper.mapTo(savedMessage);
+        messagingTemplate.convertAndSend("/user/" + message.getChatId(), messageResponse);
         return messageResponse;
     }
 

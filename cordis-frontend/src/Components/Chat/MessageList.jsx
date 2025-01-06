@@ -1,20 +1,34 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import Message from "./Message.jsx";
 
 
 const MessageList = ({ messages }) => {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+    }, [messages]);
+
     return (
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div
+            ref={containerRef}
+            className="flex-1 overflow-y-auto p-4 space-y-2"
+            style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+            }}
+        >
+            <style>{`
+                div::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
             {messages.length > 0 ? (
-                messages.map((message, index) => {
-                    return (
-                        <Message
-                            key={index}
-                            message={message}
-                            showUserInfo={true}
-                        />
-                    );
-                })
+                messages.map((message, index) => (
+                    <Message key={index} message={message} showUserInfo={true} />
+                ))
             ) : (
                 <p className="text-center text-gray-400">No messages yet</p>
             )}
