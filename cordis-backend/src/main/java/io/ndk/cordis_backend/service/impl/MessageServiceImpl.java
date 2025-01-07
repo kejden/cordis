@@ -12,6 +12,7 @@ import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -43,10 +44,10 @@ public class MessageServiceImpl implements MessageService {
         return messageResponse;
     }
 
-    @Override
-    public Page<MessageResponse> getMessages(Long channelId, Pageable pageable) {
-        return messageRepository.findByChannelId(channelId, pageable).map(mapper::mapTo);
-    }
+//    @Override
+//    public Page<MessageResponse> getMessages(Long channelId, int page, int size) {
+//        return messageRepository.findByChannelId(channelId, PageRequest.of(page, size)).map(mapper::mapTo);
+//    }
 
     @Override
     public List<MessageResponse> getMessages(Long chatId) {

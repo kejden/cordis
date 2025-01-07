@@ -13,14 +13,16 @@ const initialValue = {
 };
 
 export const authReducer = (store = initialValue, { type, payload }) => {
-    if (type === REGISTER) {
-        return { ...store, signup: payload };
-    } else if (type === LOGIN) {
-        return { ...store, signin: payload };
-    } else if (type === REQ_USER) {
-        return { ...store, reqUser: payload };
-    } else if (type === UPDATE_USER) {
-        return { ...store, updateUser: payload };
+    switch (type) {
+        case REGISTER:
+            return { ...store, signup: payload };
+        case LOGIN:
+            return { ...store, signin: payload };
+        case REQ_USER:
+            return { ...store, reqUser: payload };
+        case UPDATE_USER:
+            return { ...store, updateUser: payload };
+        default:
+            return store;
     }
-    return store;
 };

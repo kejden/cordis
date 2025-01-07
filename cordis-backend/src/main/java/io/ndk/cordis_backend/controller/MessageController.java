@@ -24,6 +24,14 @@ public class MessageController {
         return new ResponseEntity<>(dm, HttpStatus.OK);
     }
 
+//    @GetMapping("/{channelId}")
+//    public ResponseEntity<?> getMessages(@PathVariable Long channelId,
+//                                         @RequestParam(defaultValue = "0") int page,
+//                                         @RequestParam(defaultValue = "10") int size){
+//        return new ResponseEntity<>(messageService.getMessages(channelId, page, size), HttpStatus.OK);
+//    }
+
+
     // TODO change implementation from List to Page
     @GetMapping("/{channelId}")
     public ResponseEntity<?> getMessages(@PathVariable Long channelId){
