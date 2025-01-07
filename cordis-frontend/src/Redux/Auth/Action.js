@@ -1,9 +1,6 @@
 import {BASE_API_URL} from "../../config/api.js";
 import axios from "axios";
-import {LOGIN, LOGOUT, REGISTER, REQ_USER} from "./ActionType.js";
-import storage from "redux-persist/lib/storage";
-import {persistor, store} from "../store.jsx";
-import {persistStore} from "redux-persist";
+import {LOGIN, REGISTER, REQ_USER} from "./ActionType.js";
 
 export const register = (data) => async (dispatch) => {
     try {

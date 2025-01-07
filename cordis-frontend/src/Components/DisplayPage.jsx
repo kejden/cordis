@@ -111,7 +111,9 @@ const DisplayPage = () => {
                     setIsGroup={ () => setIsGroup(false)}/>}
                 {chatOpen && <ChatWindow
                                 handleCreateNewMessage={ (content) => handleCreateNewMessage(content)}
-                                messages={messages} />}
+                                messages={messages}
+                                onClose={() => setChatOpen(false)}
+                            />}
             </div>
         </>
     )

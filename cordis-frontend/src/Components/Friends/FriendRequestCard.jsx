@@ -1,9 +1,28 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import pfp from '../../assets/img/pfp.jpg'
 import {BsChatFill} from "react-icons/bs";
 import {SlOptionsVertical} from "react-icons/sl";
+import axios from "axios";
+import {BASE_API_URL} from "../../config/api.js";
+import toast from "react-hot-toast";
 
-const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWindow }) => {
+const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWindow, handleBanFriend }) => {
+    const [optionsOpen, setOptionsOpen] = useState(false);
+    const optionsRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+                setOptionsOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
         <>
             <div
@@ -12,7 +31,6 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWin
             >
 
                 <div className="flex items-center space-x-4">
-                    {/* Avatar */}
                     <div className="w-10 h-10">
                         <img
                             src={pfp}
@@ -20,13 +38,11 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWin
                             className="w-10 h-10 rounded-full object-cover"
                         />
                     </div>
-                    {/* User details */}
                     <div>
                         <p className="text-base font-medium">{friend.userName}</p>
                     </div>
                 </div>
                 <div className="flex space-x-3">
-                    {/*Buttons*/}
                     {onAccept && (
                         <button
                             onClick={() => onAccept(friend.id)}
@@ -46,23 +62,37 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWin
                 </div>
                 {!onAccept && (<div className="flex items-center float-end space-x-2">
                     <div className="rounded-full  inline-block bg-gray-700 hover:bg-gray-900"
-                        onClick={
-                            () => {
-                                setChatOpen(true)
-                                setChatWindow(friend.id)
-                            }
-                        }
+                         onClick={
+                             () => {
+                                 setChatOpen(true)
+                                 setChatWindow(friend.id)
+                             }
+                         }
                     >
-                        <BsChatFill className="text-xl m-2.5" />
+                        <BsChatFill className="text-xl m-2.5"/>
                     </div>
+                    <div className="relative flex items-center space-x-2">
+                        <div
+                            className="rounded-full inline-block bg-gray-700 hover:bg-gray-900"
+                            onClick={() => setOptionsOpen(!optionsOpen)}
+                        >
+                            <SlOptionsVertical className="text-xl m-2.5"/>
+                        </div>
 
-                    <div className="rounded-full inline-block bg-gray-700 hover:bg-gray-900"
-                         // todo onClick ban
-                    >
-                        <SlOptionsVertical className="text-xl m-2.5"/>
+                        {optionsOpen && (
+                            <div
+                                className="absolute left-full top-0 ml-2 bg-gray-900 text-red-700 rounded shadow-lg p-2 w-40 z-10"
+                            >
+                                <button
+                                    className="block w-full text-left px-4 py-2 hover:bg-gray-600 rounded"
+                                    onClick={() => handleBanFriend(friend.id)}
+                                >
+                                    Ban Friend
+                                </button>
+                            </div>
+                        )}
                     </div>
-
-                </div>) }
+                </div>)}
             </div>
         </>
     );

@@ -3,6 +3,7 @@ import FriendRequestCard from "./FriendRequestCard.jsx";
 import { FaUserFriends } from "react-icons/fa";
 import {BASE_API_URL} from "../../config/api.js";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 
 
@@ -117,6 +118,26 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
         }
     };
 
+    const handleBanFriend = async (friendId) => {
+        try {
+            console.log()
+            const response = await axios.post(`${BASE_API_URL}/api/friend/ban/${friendId}`,{},{
+                withCredentials: true,
+            });
+            if (response.status === 200) {
+                toast.success("Friend banned successfully!");
+                setAcceptedFriends((prevFriends) =>
+                    prevFriends.filter((friend) => friend.id !== friendId)
+                );
+            } else {
+                toast.error("Failed to ban friend.");
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("An error occurred while banning the friend.");
+        }
+    };
+
     return (
         <>
             <div className="w-4/5  p-6 bg-gray-800 text-white float-end">
@@ -169,6 +190,7 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
                                     onRefuse={null}
                                     setChatOpen={setChatOpen}
                                     setChatWindow={setChatWindow}
+                                    handleBanFriend={(friendId) => handleBanFriend(friendId)}
                                 />
                             ))
                         ) : (
@@ -187,6 +209,7 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
                                     friend={friend}
                                     onAccept={acceptFriend}
                                     onRefuse={refuseFriend}
+                                    handleBanFriend={(friendId) => handleBanFriend(friendId)}
                                 />
                             ))
                         ) : (
@@ -205,6 +228,7 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
                                     friend={friend}
                                     onAccept={null}
                                     onRefuse={null}
+                                    handleBanFriend={(friendId) => handleBanFriend(friendId)}
                                 />
                             ))
                         ) : (
