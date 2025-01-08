@@ -1,7 +1,9 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.AccountSignUp;
+import io.ndk.cordis_backend.dto.request.EditUserRequest;
 import io.ndk.cordis_backend.dto.request.SignInRequest;
 import io.ndk.cordis_backend.dto.response.SignInResponse;
 import io.ndk.cordis_backend.entity.UserEntity;
@@ -9,6 +11,7 @@ import io.ndk.cordis_backend.enums.UserStatus;
 import io.ndk.cordis_backend.handler.BusinessErrorCodes;
 import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.repository.UserRepository;
+import io.ndk.cordis_backend.service.FileService;
 import io.ndk.cordis_backend.service.JwtService;
 import io.ndk.cordis_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.security.Principal;
+import java.util.Optional;
+
+import static io.ndk.cordis_backend.constan.Constant.PHOTO_DIR;
 
 @Service
 @Transactional
@@ -29,6 +38,8 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final Mapper<UserEntity, AccountSignUp> mapper;
+    private final Mapper<UserEntity, UserDto> userMapper;
+    private final FileService fileService;
 
 
     @Override
@@ -40,6 +51,7 @@ public class UserServiceImpl implements UserService {
                 .email(dto.getEmail())
                 .userName(dto.getUserName())
                 .status(UserStatus.OFFLINE)
+                .profileImage(fileService.getDefault())
                 .build();
         UserEntity savedUser = userRepository.save(user);
         return mapper.mapTo(savedUser);
@@ -63,6 +75,7 @@ public class UserServiceImpl implements UserService {
                             .id(user.getId())
                             .userName(user.getUserName())
                             .email(dto.getEmail())
+                            .profileImage(user.getProfileImage())
                             .build();
         } else {
             throw new CustomException(BusinessErrorCodes.BAD_CREDENTIALS);
@@ -75,4 +88,38 @@ public class UserServiceImpl implements UserService {
         user.setStatus(UserStatus.OFFLINE);
         userRepository.save(user);
     }
+
+    @Override
+    public UserDto updateUser(String email, UserDto dto) {
+        return userMapper.mapTo(userRepository.findByEmail(email).map(existingUser -> {
+                    Optional.ofNullable(dto.getUserName()).ifPresent(existingUser::setUserName);
+                    Optional.ofNullable(dto.getProfileImage()).ifPresent(existingUser::setProfileImage);
+                    return userRepository.save(existingUser);
+            }).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL)
+        ));
+    }
+
+    @Override
+    public UserDto editUser(EditUserRequest request, String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+        user.setUserName(request.getUsername());
+        UserEntity save = userRepository.save(user);
+
+        return userMapper.mapTo(save);
+    }
+
+    @Override
+    public String updateUserImageProfile(MultipartFile file, Principal principal) {
+        UserEntity user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+
+        String imagePath = fileService.updateFile(file, user.getProfileImage());
+        user.setProfileImage(imagePath);
+        userRepository.save(user);
+        return PHOTO_DIR+imagePath;
+    }
+
+
 }

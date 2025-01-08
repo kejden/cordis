@@ -4,26 +4,61 @@ import {useDispatch, useSelector} from "react-redux";
 import {useState} from "react";
 import {logoutAction} from "../../Redux/Auth/Action.js";
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
+
 
 const UserCard = () => {
     const { auth } = useSelector((store) => store);
     const dispatch = useDispatch();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const navigate = useNavigate();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [nickname, setNickname] = useState(auth.reqUser.userName);
+    const [profileImage, setProfileImage] = useState(null);
 
     function userProfileEdit() {
         setIsDialogOpen(true);
     }
 
+    function closeDialog() {
+        setIsDialogOpen(false);
+    }
+
     function handleLogout() {
         dispatch(logoutAction()).then(() => {
-            console.log(auth)
             navigate("/login");
         });
     }
 
-    function closeDialog() {
-        setIsDialogOpen(false);
+    async function handleNicknameUpdate() {
+        try {
+            const response = await axios.post("/profile/edit", {
+                nickname: nickname,
+            }, {withCredentials: true});
+            alert("Nickname updated successfully");
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Error updating nickname:", error);
+            alert("Failed to update nickname");
+        }
+    }
+
+    async function handleProfileImageUpdate() {
+        const formData = new FormData();
+        formData.append("image", profileImage);
+
+        try {
+            const response = await axios.put("/profile/image", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                withCredentials: true
+            });
+            alert("Profile image updated successfully");
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Error updating profile image:", error);
+            alert("Failed to update profile image");
+        }
     }
 
     return (
@@ -49,6 +84,38 @@ const UserCard = () => {
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-gray-800 text-white p-6 rounded-md shadow-lg w-80">
                         <h2 className="text-lg font-semibold mb-4">Profile Settings</h2>
+
+                        <label className="block mb-2">
+                            <span className="text-sm font-medium">Nickname</span>
+                            <input
+                                type="text"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                className="w-full mt-1 p-2 bg-gray-700 text-white rounded"
+                            />
+                        </label>
+                        <button
+                            onClick={handleNicknameUpdate}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded mb-4"
+                        >
+                            Update Nickname
+                        </button>
+
+                        <label className="block mb-2">
+                            <span className="text-sm font-medium">Profile Image</span>
+                            <input
+                                type="file"
+                                onChange={(e) => setProfileImage(e.target.files[0])}
+                                className="w-full mt-1 p-2 bg-gray-700 text-white rounded"
+                            />
+                        </label>
+                        <button
+                            onClick={handleProfileImageUpdate}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded mb-4"
+                        >
+                            Update Profile Image
+                        </button>
+
                         <button
                             onClick={handleLogout}
                             className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded mb-4"

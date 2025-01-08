@@ -19,8 +19,9 @@ public enum BusinessErrorCodes {
     NICKNAME_IS_USED(308, "Nick name is used", HttpStatus.BAD_REQUEST),
     NO_SUCH_ID(309, "There is no user with that ID", HttpStatus.BAD_REQUEST),
     BAD_COOKIE(310, "Provided cookie is incorrect", HttpStatus.BAD_REQUEST),
-//    USER_IS_ENABLE(310, "User is already activated", HttpStatus.BAD_REQUEST),
-    ;
+    IMAGE_FETCH_FAILED(311, "Operation of fetching image has failed", HttpStatus.BAD_REQUEST),
+    IMAGE_NOT_FOUND(312, "This file doesn't exist", HttpStatus.BAD_REQUEST),
+    IMAGE_UPDATE_FAILED(313, "Failed to update image", HttpStatus.BAD_REQUEST),;
 
     @Getter
     private final int code;

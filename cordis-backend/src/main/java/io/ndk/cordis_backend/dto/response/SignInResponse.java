@@ -15,4 +15,6 @@ public class SignInResponse {
     private String userName;
 
     private String email;
+
+    private String profileImage;
 }

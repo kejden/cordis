@@ -39,4 +39,6 @@ public class UserEntity {
     @Column(nullable = false)
     private UserStatus status;
 
+    private String profileImage;
+
 }
