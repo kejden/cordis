@@ -23,20 +23,19 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWin
     return (
         <>
             <div
-                key={friend.userId}
                 className="w-2/3 p-4 bg-gray-800 hover:bg-gray-600 text-white rounded flex justify-between items-center border-t-2 border-t-gray-600"
             >
 
                 <div className="flex items-center space-x-4">
                     <div className="w-10 h-10">
                         <img
-                            src={pfp}
-                            alt={`${friend.userName}'s avatar`}
+                            src={`http://localhost:8080/uploads/${friend.user.profileImage}`}
+                            alt={`${friend.user.userName}'s avatar`}
                             className="w-10 h-10 rounded-full object-cover"
                         />
                     </div>
                     <div>
-                        <p className="text-base font-medium">{friend.userName}</p>
+                        <p className="text-base font-medium">{friend.user.userName}</p>
                     </div>
                 </div>
                 <div className="flex space-x-3">

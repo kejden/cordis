@@ -1,6 +1,7 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.FriendRequest;
 import io.ndk.cordis_backend.dto.response.FriendResponse;
 import io.ndk.cordis_backend.entity.DirectMessageEntity;
@@ -30,6 +31,7 @@ public class FriendServiceImpl implements FriendService {
     private final UserRepository userRepository;
     private final DirectMessageRepository directMessageRepository;
     private final Mapper<FriendEntity, FriendResponse> mapper;
+    private final Mapper<UserEntity, UserDto> userMapper;
 
     @Override
     public void requestFriend(FriendRequest friendRequest, String email) {
@@ -136,9 +138,7 @@ public class FriendServiceImpl implements FriendService {
     private FriendResponse convertRequestFriend(FriendEntity friend) {
         FriendResponse response = FriendResponse.builder()
                 .id(friend.getId())
-                .userId(friend.getSender().getId())
-                .userName(friend.getSender().getUserName())
-//                .profileImage(friend.getSender().getProfileImage())
+                .user(userMapper.mapTo(fetchUserByUsername(friend.getSender().getUserName())))
                 .state(friend.getFriendState().toString().equals("REQUEST") ? "WAITING" : friend.getFriendState().toString()).build();
 
         return response;
@@ -147,11 +147,15 @@ public class FriendServiceImpl implements FriendService {
     private FriendResponse convertResponseFriend(FriendEntity friend) {
         FriendResponse response = FriendResponse.builder()
                 .id(friend.getId())
-                .userId(friend.getReceiver().getId())
-                .userName(friend.getReceiver().getUserName())
-//                .profileImage(friend.getReceiver().getProfileImage())
+                .user(userMapper.mapTo(fetchUserByUsername(friend.getReceiver().getUserName())))
                 .state(friend.getFriendState().toString()).build();
 
         return response;
+    }
+
+    private UserEntity fetchUserByUsername(String username) {
+        return userRepository.findByUserName(username).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_USERNAME)
+        );
     }
 }

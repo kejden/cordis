@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 import UserCard from "./UserCard.jsx";
-import pfp from '../../assets/img/pfp.jpg'
-
 
 const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) => {
     useEffect(() => {
@@ -28,11 +26,11 @@ const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) 
                                     }}
                                 >
                                     <img
-                                        src={pfp}
-                                        alt={`${chat.userName}'s profile`}
+                                        src={`http://localhost:8080/uploads/${chat.user.profileImage}`}
+                                        alt={`${chat.user.userName}'s profile`}
                                         className="w-10 h-10 rounded-full mr-3"
                                     />
-                                    <span className="text-white">{chat.userName}</span>
+                                    <span className="text-white">{chat.user.userName}</span>
                                 </div>
                             ))}
                         </div>

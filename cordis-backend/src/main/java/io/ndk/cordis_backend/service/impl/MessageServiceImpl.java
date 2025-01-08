@@ -1,6 +1,7 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.MessageRequest;
 import io.ndk.cordis_backend.dto.response.MessageResponse;
 import io.ndk.cordis_backend.entity.DirectMessageEntity;

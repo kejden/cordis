@@ -18,6 +18,7 @@ const Login = () => {
         e.preventDefault();
         dispatch(login(user))
             .then(() => {
+                console.log("LOGIN: ",auth.reqUser)
                 navigate("/");
                 toast.success("You have logged in successfully.");
             })

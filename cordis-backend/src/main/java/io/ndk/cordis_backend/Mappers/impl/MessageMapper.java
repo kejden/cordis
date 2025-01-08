@@ -16,14 +16,7 @@ public class MessageMapper implements Mapper<DirectMessageEntity, MessageRespons
 
     @Override
     public MessageResponse mapTo(DirectMessageEntity directMessageEntity) {
-        MessageResponse messageResponse = MessageResponse.builder()
-                .id(directMessageEntity.getId())
-                .chatId(directMessageEntity.getChatId())
-                .sender(directMessageEntity.getSender().getUserName())
-                .content(directMessageEntity.getContent())
-                .sendAt(directMessageEntity.getTimestamp())
-                .build();
-        return messageResponse;
+        return modelMapper.map(directMessageEntity, MessageResponse.class);
     }
 
     @Override

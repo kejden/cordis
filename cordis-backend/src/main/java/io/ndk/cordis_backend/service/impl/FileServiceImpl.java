@@ -3,6 +3,7 @@ package io.ndk.cordis_backend.service.impl;
 import io.ndk.cordis_backend.handler.BusinessErrorCodes;
 import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.service.FileService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,17 +14,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
-import static io.ndk.cordis_backend.constan.Constant.PHOTO_DIR;
-
 @Component
 public class FileServiceImpl implements FileService {
 
-    private final String defaultFileName = "default.png";
+    @Value("${application.file.image-dir}")
+    private String imageDir;
+    private String defaultFileName = "default.png";
 
     @Override
     public String saveFile(MultipartFile file) {
         try {
-            Path folderPath = Paths.get(PHOTO_DIR);
+            Path folderPath = Paths.get(imageDir);
 
             if (!Files.exists(folderPath)) {
                 Files.createDirectories(folderPath);
@@ -33,7 +34,7 @@ public class FileServiceImpl implements FileService {
             Path filePath = folderPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            return PHOTO_DIR+fileName;
+            return fileName;
         } catch (IOException e) {
             throw new CustomException(BusinessErrorCodes.IMAGE_FETCH_FAILED);
         }
@@ -56,7 +57,7 @@ public class FileServiceImpl implements FileService {
     public void deleteFile(String filePath) {
         try {
 
-            Path file = Paths.get(PHOTO_DIR+filePath);
+            Path file = Paths.get(imageDir+filePath);
             String fileName = file.getFileName().toString();
 
             if (Files.exists(file) && !"default.jpg".equals(fileName)) {
@@ -70,6 +71,6 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String getDefault() {
-        return PHOTO_DIR + defaultFileName;
+        return defaultFileName;
     }
 }

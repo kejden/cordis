@@ -1,10 +1,13 @@
 import pfp from "../../assets/img/pfp.jpg";
 import { BiCog } from "react-icons/bi";
 import {useDispatch, useSelector} from "react-redux";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {logoutAction} from "../../Redux/Auth/Action.js";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import {BASE_API_URL} from "../../config/api.js";
+import toast from "react-hot-toast";
+import {LOGIN, UPDATE_USER} from "../../Redux/Auth/ActionType.js";
 
 
 const UserCard = () => {
@@ -31,13 +34,16 @@ const UserCard = () => {
 
     async function handleNicknameUpdate() {
         try {
-            const response = await axios.post("/profile/edit", {
-                nickname: nickname,
+            const response = await axios.post(`${BASE_API_URL}/profile/edit`, {
+                username: nickname,
             }, {withCredentials: true});
-            alert("Nickname updated successfully");
+            const data = await response.data;
+            // dispatch({ type: UPDATE_USER, payload: data });
+            // dispatch({ type: UPDATE_USER, payload: data });
+            toast.success("Nickname updated successfully");
             setIsDialogOpen(false);
         } catch (error) {
-            console.error("Error updating nickname:", error);
+            toast.error("Error updating nickname:", error);
             alert("Failed to update nickname");
         }
     }
@@ -47,25 +53,29 @@ const UserCard = () => {
         formData.append("image", profileImage);
 
         try {
-            const response = await axios.put("/profile/image", formData, {
+            const response = await axios.put(`${BASE_API_URL}/profile/image`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
                 withCredentials: true
             });
-            alert("Profile image updated successfully");
+            toast.success("Profile image updated successfully");
             setIsDialogOpen(false);
         } catch (error) {
-            console.error("Error updating profile image:", error);
+            toast.error("Error updating profile image:", error);
             alert("Failed to update profile image");
         }
     }
+
+    useEffect(() => {
+        console.log(auth.reqUser.profileImage);
+    }, [])
 
     return (
         <div className="flex items-center text-white">
             <div className="m-1 w-10 h-10">
                 <img
-                    src={pfp}
+                    src={`http://localhost:8080/uploads/${auth.reqUser.profileImage}`}
                     alt={`${auth.reqUser.userName}'s avatar`}
                     className="w-10 h-10 rounded-full object-cover"
                 />

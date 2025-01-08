@@ -15,6 +15,7 @@ import io.ndk.cordis_backend.service.FileService;
 import io.ndk.cordis_backend.service.JwtService;
 import io.ndk.cordis_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,8 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.Optional;
-
-import static io.ndk.cordis_backend.constan.Constant.PHOTO_DIR;
 
 @Service
 @Transactional
@@ -41,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private final Mapper<UserEntity, UserDto> userMapper;
     private final FileService fileService;
 
+    @Value("${application.file.cdn}")
+    private String cdnBaseUrl;
 
     @Override
     public AccountSignUp signUp(AccountSignUp dto) {
@@ -118,7 +119,7 @@ public class UserServiceImpl implements UserService {
         String imagePath = fileService.updateFile(file, user.getProfileImage());
         user.setProfileImage(imagePath);
         userRepository.save(user);
-        return PHOTO_DIR+imagePath;
+        return cdnBaseUrl+imagePath;
     }
 
 
