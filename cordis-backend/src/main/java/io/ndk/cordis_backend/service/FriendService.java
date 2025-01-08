@@ -10,6 +10,7 @@ public interface FriendService {
     List<FriendResponse> getFriendResponse(String email);
     List<FriendResponse> getPendingFriendResponse(String name);
     List<FriendResponse> getAwaitingFriendResponse(String name);
+    List<FriendResponse> latestChats(String email);
     void refuseFriend(Long id);
     void addFriend(Long id);
     void banFriend(Long id);

@@ -7,6 +7,9 @@ import { over } from "stompjs";
 import {useDispatch, useSelector} from "react-redux";
 import {createMessage, getAllMessages} from "../Redux/Message/Action.js";
 import ChatWindow from "./Chat/ChatWindow.jsx";
+import axios from "axios";
+import {BASE_API_URL} from "../config/api.js";
+import toast from "react-hot-toast";
 
 const DisplayPage = () => {
     const { auth, message} = useSelector((store) => store);
@@ -18,6 +21,7 @@ const DisplayPage = () => {
     const [messages, setMessages] = useState([]);
     const [content, setContent] = useState("");
     const dispatch = useDispatch();
+    const [latestChats, setLatestChats] = useState([]);
 
     useEffect(() => {
         if (chatWindow) {
@@ -35,6 +39,7 @@ const DisplayPage = () => {
 
     useEffect(() => {
         connect();
+        fetchLatestChats();
     }, []);
 
     const onError = (error) => {
@@ -100,11 +105,28 @@ const DisplayPage = () => {
         console.log(message.newMessage);
     };
 
+    const fetchLatestChats = async () => {
+        try {
+            const response = await axios.get(`${BASE_API_URL}/api/friend/latestChats`, {
+                withCredentials: true,
+            });
+            setLatestChats(response.data);
+        } catch (error) {
+            console.error("Error fetching latest chats:", error);
+            toast.error("Error fetching latest chats");
+        }
+    };
+
     return (
         <>
             <ServerBar/>
             <div className="flex h-screen">
-                <FriendSideBar/>
+                <FriendSideBar
+                    latestChats={latestChats}
+                    setChatOpen={setChatOpen}
+                    setChatWindow={setChatWindow}
+                    setIsGroup={ () => setIsGroup(false)}
+                />
                 {!chatOpen && <FriendManager
                     setChatOpen={setChatOpen}
                     setChatWindow={setChatWindow}

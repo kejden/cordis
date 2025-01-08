@@ -15,4 +15,5 @@ public interface DirectMessageRepository extends JpaRepository<DirectMessageEnti
     @Query("SELECT m FROM DirectMessageEntity m WHERE m.chatId = :chatId ORDER BY m.timestamp ASC")
     Page<DirectMessageEntity> findByChannelId(@Param("chatId") Long chatId, Pageable pageable);
     List<DirectMessageEntity> findByChatId(Long chatId);
+    DirectMessageEntity findTopByChatIdOrderByTimestampDesc(Long chatId);
 }

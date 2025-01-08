@@ -59,4 +59,9 @@ public class FriendController {
         friendService.banFriend(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/latestChats")
+    public ResponseEntity<?> latestChats(Principal principal) {
+        return new ResponseEntity<>( friendService.latestChats(principal.getName()), HttpStatus.OK);
+    }
 }

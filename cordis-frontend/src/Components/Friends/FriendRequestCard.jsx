@@ -2,9 +2,6 @@ import React, {useEffect, useRef, useState} from "react";
 import pfp from '../../assets/img/pfp.jpg'
 import {BsChatFill} from "react-icons/bs";
 import {SlOptionsVertical} from "react-icons/sl";
-import axios from "axios";
-import {BASE_API_URL} from "../../config/api.js";
-import toast from "react-hot-toast";
 
 const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWindow, handleBanFriend }) => {
     const [optionsOpen, setOptionsOpen] = useState(false);
