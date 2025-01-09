@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import pfp from '../../assets/img/pfp.jpg'
 import {BsChatFill} from "react-icons/bs";
 import {SlOptionsVertical} from "react-icons/sl";
+import Status from "../User/Status.jsx";
 
 const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWindow, handleBanFriend }) => {
     const [optionsOpen, setOptionsOpen] = useState(false);
@@ -36,6 +37,7 @@ const FriendRequestCard = ({ friend, onAccept, onRefuse, setChatOpen, setChatWin
                     </div>
                     <div>
                         <p className="text-base font-medium">{friend.user.userName}</p>
+                        <Status status={friend.user.status} />
                     </div>
                 </div>
                 <div className="flex space-x-3">

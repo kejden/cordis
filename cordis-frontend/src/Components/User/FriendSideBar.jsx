@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import UserCard from "./UserCard.jsx";
+import Status from "./Status.jsx";
 
 const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) => {
 
@@ -27,7 +28,10 @@ const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) 
                                         alt={`${chat.user.userName}'s profile`}
                                         className="w-10 h-10 rounded-full mr-3"
                                     />
-                                    <span className="text-white">{chat.user.userName}</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-white">{chat.user.userName}</span>
+                                        <Status status={chat.user.status} />
+                                    </div>
                                 </div>
                             ))}
                         </div>
