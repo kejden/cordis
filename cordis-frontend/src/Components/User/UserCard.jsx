@@ -7,7 +7,7 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {BASE_API_URL} from "../../config/api.js";
 import toast from "react-hot-toast";
-import {LOGIN, UPDATE_USER} from "../../Redux/Auth/ActionType.js";
+import { UPDATE_PROFILE_IMAGE, UPDATE_USER} from "../../Redux/Auth/ActionType.js";
 
 
 const UserCard = () => {
@@ -36,15 +36,16 @@ const UserCard = () => {
         try {
             const response = await axios.post(`${BASE_API_URL}/profile/edit`, {
                 username: nickname,
-            }, {withCredentials: true});
+            }, { withCredentials: true });
             const data = await response.data;
-            // dispatch({ type: UPDATE_USER, payload: data });
-            // dispatch({ type: UPDATE_USER, payload: data });
+
+            dispatch({ type: UPDATE_USER, payload: data });
+
             toast.success("Nickname updated successfully");
             setIsDialogOpen(false);
         } catch (error) {
-            toast.error("Error updating nickname:", error);
-            alert("Failed to update nickname");
+            toast.error("Error updating nickname");
+            console.error("Failed to update nickname:", error);
         }
     }
 
@@ -57,18 +58,23 @@ const UserCard = () => {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
-                withCredentials: true
+                withCredentials: true,
             });
+            const data = await response.data;
+            const strippedData = data.replace(/^.*\/uploads\//, '');
+
+            dispatch({ type: UPDATE_PROFILE_IMAGE, payload: { profileImage: strippedData } });
+
             toast.success("Profile image updated successfully");
             setIsDialogOpen(false);
         } catch (error) {
-            toast.error("Error updating profile image:", error);
-            alert("Failed to update profile image");
+            toast.error("Error updating profile image");
+            console.error("Failed to update profile image:", error);
         }
     }
 
     useEffect(() => {
-        console.log(auth.reqUser.profileImage);
+        console.log(auth.reqUser);
     }, [])
 
     return (

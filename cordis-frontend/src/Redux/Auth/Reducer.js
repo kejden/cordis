@@ -3,6 +3,7 @@ import {
     REGISTER,
     UPDATE_USER,
     REQ_USER,
+    UPDATE_PROFILE_IMAGE,
 } from "./ActionType";
 
 const initialValue = {
@@ -21,7 +22,22 @@ export const authReducer = (store = initialValue, { type, payload }) => {
         case REQ_USER:
             return { ...store, reqUser: payload };
         case UPDATE_USER:
-            return { ...store, updateUser: payload };
+            return {
+                ...store,
+                reqUser: {
+                    ...store.reqUser,
+                    ...payload,
+                },
+                updateUser: payload,
+            };
+        case UPDATE_PROFILE_IMAGE:
+            return {
+                ...store,
+                reqUser: {
+                    ...store.reqUser,
+                    profileImage: payload.profileImage,
+                },
+            };
         default:
             return store;
     }

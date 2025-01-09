@@ -2,9 +2,6 @@ import React, { useEffect } from "react";
 import UserCard from "./UserCard.jsx";
 
 const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) => {
-    useEffect(() => {
-        console.log(latestChats);
-    }, [latestChats]);
 
     return (
         <>

@@ -102,7 +102,7 @@ const DisplayPage = () => {
             createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id })
         );
         setContent("");
-        console.log(message.newMessage);
+        // console.log(message.newMessage);
     };
 
     const fetchLatestChats = async () => {
