@@ -4,10 +4,11 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { authReducer } from "./Auth/Reducer";
 import { messageReducer } from "./Message/Reducer";
+import {chatReducer} from "./Chat/Reducer.js";
 
 const rootReducer = combineReducers({
     auth: authReducer,
-    // chat: chatReducer,
+    chat: chatReducer,
     message: messageReducer,
 });
 

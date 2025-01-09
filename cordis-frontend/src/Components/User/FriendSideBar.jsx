@@ -9,7 +9,7 @@ const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) 
                 <div className="w-1/5"></div>
                 <div className="flex flex-col w-4/5 bg-gray-900">
                     <div className="flex-grow">
-                        <div className="flex flex-col p-8 items-center justify-center w-full">
+                        <div className="flex flex-col p-7 items-center justify-center w-full">
                             <h2 className="text-lg font-semibold mb-2 text-white">Latest chats</h2>
                         </div>
                         <div className="flex flex-col">
