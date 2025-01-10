@@ -23,7 +23,9 @@ public enum BusinessErrorCodes {
     IMAGE_NOT_FOUND(312, "This file doesn't exist", HttpStatus.BAD_REQUEST),
     IMAGE_UPDATE_FAILED(313, "Failed to update image", HttpStatus.BAD_REQUEST),
     NO_USERNAME(312, "Username of such nickname doesn't exist", HttpStatus.BAD_REQUEST),
-    NO_SUCH_SERVER(313, "Such server doesn't exist", HttpStatus.BAD_REQUEST);
+    NO_SUCH_SERVER(313, "Such server doesn't exist", HttpStatus.BAD_REQUEST),
+    NO_MEMBER( 314, "There is no such member of this server", HttpStatus.BAD_REQUEST),
+    NO_SUCH_ROLE(315, "No such role", HttpStatus.BAD_REQUEST),;
 
     @Getter
     private final int code;

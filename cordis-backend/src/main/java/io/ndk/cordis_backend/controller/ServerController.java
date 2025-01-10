@@ -18,7 +18,6 @@ public class ServerController {
 
     private final ServerService serverService;
 
-    @GetMapping("/{id}")
     public ResponseEntity<ServerDto> getServerById(@PathVariable Long id) {
         ServerDto serverDto = serverService.getServerById(id);
         return ResponseEntity.ok(serverDto);

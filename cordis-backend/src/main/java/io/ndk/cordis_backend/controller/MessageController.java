@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -33,7 +32,6 @@ public class MessageController {
 
 
     // TODO change implementation from List to Page
-    @GetMapping("/{channelId}")
     public ResponseEntity<?> getMessages(@PathVariable Long channelId){
         return new ResponseEntity<>(messageService.getMessages(channelId), HttpStatus.OK);
     }

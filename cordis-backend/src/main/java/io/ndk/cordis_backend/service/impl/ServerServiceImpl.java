@@ -10,13 +10,13 @@ import io.ndk.cordis_backend.repository.ServerRepository;
 import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.FileService;
 import io.ndk.cordis_backend.service.ServerService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ServerServiceImpl implements ServerService {
 
     private final ServerRepository serverRepository;
