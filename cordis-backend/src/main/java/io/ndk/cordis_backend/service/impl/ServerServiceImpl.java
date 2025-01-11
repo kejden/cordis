@@ -1,8 +1,10 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.dto.RoleDto;
 import io.ndk.cordis_backend.dto.ServerDto;
 import io.ndk.cordis_backend.dto.request.ServerCreate;
+import io.ndk.cordis_backend.dto.response.ServerResponse;
 import io.ndk.cordis_backend.entity.MemberRolesEntity;
 import io.ndk.cordis_backend.entity.RoleEntity;
 import io.ndk.cordis_backend.entity.ServerEntity;
@@ -14,12 +16,14 @@ import io.ndk.cordis_backend.repository.RoleRepository;
 import io.ndk.cordis_backend.repository.ServerRepository;
 import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.FileService;
-import io.ndk.cordis_backend.service.MemberRolesService;
 import io.ndk.cordis_backend.service.ServerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class ServerServiceImpl implements ServerService {
     private final RoleRepository roleRepository;
     private final FileService fileService;
     private final Mapper<ServerEntity, ServerDto> mapper;
+    private final Mapper<RoleEntity, RoleDto> roleMapper;
 
     @Value("${application.file.cdn}")
     private String cdnBaseUrl;
@@ -106,6 +111,23 @@ public class ServerServiceImpl implements ServerService {
         }else{
             throw new CustomException(BusinessErrorCodes.NO_PERMISSION);
         }
+    }
+
+    @Override
+    public List<ServerResponse> getAllServerOfUser(String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL)
+        );
+        List<MemberRolesEntity> mbs = mbrRepository.findByUserId(user.getId());
+        List<ServerResponse> response = new ArrayList<>();
+        for(MemberRolesEntity mb : mbs){
+            response.add(
+                    ServerResponse.builder()
+                            .server(mapper.mapTo(mb.getServer()))
+                            .role(roleMapper.mapTo(mb.getRole()))
+                            .build());
+        }
+        return response;
     }
 
     private UserEntity getUserEntity(String email) {

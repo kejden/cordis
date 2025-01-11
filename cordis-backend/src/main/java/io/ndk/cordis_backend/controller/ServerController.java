@@ -2,6 +2,7 @@ package io.ndk.cordis_backend.controller;
 
 import io.ndk.cordis_backend.dto.ServerDto;
 import io.ndk.cordis_backend.dto.request.ServerCreate;
+import io.ndk.cordis_backend.dto.response.ServerResponse;
 import io.ndk.cordis_backend.service.ServerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/server")
@@ -22,6 +24,11 @@ public class ServerController {
     public ResponseEntity<ServerDto> getServerById(@PathVariable Long id) {
         ServerDto serverDto = serverService.getServerById(id);
         return ResponseEntity.ok(serverDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ServerResponse>> getAllServersOfUSer(Principal principal) {
+        return new ResponseEntity<>(serverService.getAllServerOfUser(principal.getName()), HttpStatus.OK);
     }
 
     @PostMapping
@@ -51,6 +58,4 @@ public class ServerController {
         String imagePath = serverService.updateServerImage(file, id, principal.getName());
         return new ResponseEntity<>(imagePath, HttpStatus.OK);
     }
-
-
 }

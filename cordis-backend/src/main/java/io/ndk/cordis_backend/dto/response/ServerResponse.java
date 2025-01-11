@@ -1,5 +1,7 @@
-package io.ndk.cordis_backend.dto;
+package io.ndk.cordis_backend.dto.response;
 
+import io.ndk.cordis_backend.dto.RoleDto;
+import io.ndk.cordis_backend.dto.ServerDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class MemberRolesDto {
-//    private Long id;
+public class ServerResponse {
     private ServerDto server;
-    private UserDto user;
     private RoleDto role;
 }

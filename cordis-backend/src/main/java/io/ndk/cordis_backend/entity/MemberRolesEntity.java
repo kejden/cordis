@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 public class MemberRolesEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
