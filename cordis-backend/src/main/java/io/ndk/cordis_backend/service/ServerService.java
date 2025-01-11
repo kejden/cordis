@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ServerService {
     ServerDto getServerById(Long id);
     ServerDto createServer(ServerCreate dto, String email);
-    ServerDto updateServer(Long id, ServerDto dto);
-    void deleteServer(Long id);
-    String updateServerImage(MultipartFile file, Long id);
+    ServerDto updateServer(Long id, ServerDto dto, String email);
+    void deleteServer(Long id, String email);
+    String updateServerImage(MultipartFile file, Long id, String email);
 }

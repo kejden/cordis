@@ -25,8 +25,9 @@ public enum BusinessErrorCodes {
     NO_USERNAME(312, "Username of such nickname doesn't exist", HttpStatus.BAD_REQUEST),
     NO_SUCH_SERVER(313, "Such server doesn't exist", HttpStatus.BAD_REQUEST),
     NO_MEMBER( 314, "There is no such member of this server", HttpStatus.BAD_REQUEST),
-    NO_SUCH_ROLE(315, "No such role", HttpStatus.BAD_REQUEST),;
-
+    NO_SUCH_ROLE(315, "No such role", HttpStatus.BAD_REQUEST),
+    USER_ROLE_EXISTS(316, "This user already has a role", HttpStatus.BAD_REQUEST),
+    NO_PERMISSION(317, "You dont have permission for that", HttpStatus.BAD_REQUEST),;
     @Getter
     private final int code;
     @Getter

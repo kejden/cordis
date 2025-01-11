@@ -18,6 +18,7 @@ public class ServerController {
 
     private final ServerService serverService;
 
+    @GetMapping("/{id}")
     public ResponseEntity<ServerDto> getServerById(@PathVariable Long id) {
         ServerDto serverDto = serverService.getServerById(id);
         return ResponseEntity.ok(serverDto);
@@ -30,14 +31,14 @@ public class ServerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServerDto> updateServer(@PathVariable Long id, @RequestBody ServerDto dto) {
-        ServerDto updatedServer = serverService.updateServer(id, dto);
+    public ResponseEntity<ServerDto> updateServer(@PathVariable Long id, @RequestBody ServerDto dto, Principal principal) {
+        ServerDto updatedServer = serverService.updateServer(id, dto, principal.getName());
         return new ResponseEntity<>(updatedServer, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteServer(@PathVariable Long id) {
-        serverService.deleteServer(id);
+    public ResponseEntity<Void> deleteServer(@PathVariable Long id, Principal principal) {
+        serverService.deleteServer(id, principal.getName());
         return ResponseEntity.noContent().build();
     }
 
@@ -45,8 +46,9 @@ public class ServerController {
     public ResponseEntity<String> uploadImageToFIleSystem(
             @RequestParam("image") MultipartFile file,
             @PathVariable Long id
+            , Principal principal
     ){
-        String imagePath = serverService.updateServerImage(file, id);
+        String imagePath = serverService.updateServerImage(file, id, principal.getName());
         return new ResponseEntity<>(imagePath, HttpStatus.OK);
     }
 

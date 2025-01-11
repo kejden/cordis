@@ -38,21 +38,25 @@ public class MemberRolesServiceImpl implements MemberRolesService {
 
     @Override
     public MemberRolesDto createMemberRoles(CreateMemberRoles dto) {
+        if(memberRolesRepository.existsByUserIdAndServerId(dto.getMemberId(), dto.getServerId())){
+            throw new CustomException(BusinessErrorCodes.USER_ROLE_EXISTS);
+        }
         MemberRolesEntity memberRolesEntity = MemberRolesEntity.builder()
                 .user(getUserEntity(dto.getMemberId()))
                 .server(getServerEntity(dto.getServerId()))
-                .role(getRoleEntity(dto.getRole()))
+                .role(getRoleEntity("USER"))
                 .build();
         return mapper.mapTo(memberRolesRepository.save(memberRolesEntity));
     }
 
     @Override
     public MemberRolesDto updateMemberRoles(CreateMemberRoles dto) {
-        return mapper.mapTo(memberRolesRepository.findByUserIdAndServerId(dto.getMemberId(), dto.getServerId())
-                .orElseThrow(
-                        () -> new CustomException(BusinessErrorCodes.NO_MEMBER)
-                )
+        MemberRolesEntity mbrEntity = memberRolesRepository.findByUserIdAndServerId(dto.getMemberId(), dto.getServerId()).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_MEMBER)
         );
+        mbrEntity.setRole(getRoleEntity(dto.getRole()));
+
+        return mapper.mapTo(memberRolesRepository.save(mbrEntity));
     }
 
     @Override
