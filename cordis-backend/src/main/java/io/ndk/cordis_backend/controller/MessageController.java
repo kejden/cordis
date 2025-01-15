@@ -30,8 +30,8 @@ public class MessageController {
 //        return new ResponseEntity<>(messageService.getMessages(channelId, page, size), HttpStatus.OK);
 //    }
 
-
     // TODO change implementation from List to Page
+    @GetMapping("/{channelId}")
     public ResponseEntity<?> getMessages(@PathVariable Long channelId){
         return new ResponseEntity<>(messageService.getMessages(channelId), HttpStatus.OK);
     }

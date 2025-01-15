@@ -1,9 +1,11 @@
 import React from 'react';
 
-const SideBarIcon = ({ icon, text = 'tooltip 💡' }) => {
+const SideBarIcon = ({ icon, text = 'tooltip 💡',  onClick }) => {
     return (
         <>
-            <div className="sidebar-icon">
+            <div className="sidebar-icon"
+                onClick={onClick}
+            >
                 {icon}
             </div>
             <span className="sidebar-tooltip">
