@@ -24,16 +24,21 @@ public class FriendController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/responses")
     public ResponseEntity<List<FriendResponse>> getFriendResponses(Principal principal) {
         List<FriendResponse> friendResponses = friendService.getFriendResponse(principal.getName());
         return new ResponseEntity<>(friendResponses, HttpStatus.OK);
     }
+
     // do kogos
+    @GetMapping("/pending")
     public ResponseEntity<List<FriendResponse>> getPendingFriendRequests(Principal principal) {
         List<FriendResponse> pendingResponses = friendService.getPendingFriendResponse(principal.getName());
         return ResponseEntity.ok(pendingResponses);
     }
+
     // uzytkownika
+    @GetMapping("/awaiting")
     public ResponseEntity<List<FriendResponse>> getAwaitingFriendRequests(Principal principal) {
         List<FriendResponse> awaitingResponses = friendService.getAwaitingFriendResponse(principal.getName());
         return ResponseEntity.ok(awaitingResponses);
@@ -57,6 +62,7 @@ public class FriendController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/latestChats")
     public ResponseEntity<?> latestChats(Principal principal) {
         return new ResponseEntity<>( friendService.latestChats(principal.getName()), HttpStatus.OK);
     }
