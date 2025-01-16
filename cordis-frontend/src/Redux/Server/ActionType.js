@@ -1,0 +1,2 @@
+export const CREATE_NEW_SERVER = "CREATE_NEW_SERVER";
+export const GET_ALL_SERVERS = "GET_ALL_SERVERS";

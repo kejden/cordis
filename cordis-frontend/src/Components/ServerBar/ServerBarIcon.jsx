@@ -1,12 +1,15 @@
 import React from 'react';
 
-const SideBarIcon = ({ icon, text,  onClick }) => {
+const ServerBarIcon = ({ icon, text,  onClick }) => {
     return (
         <>
             <div className="sidebar-icon"
                  onClick={onClick}
             >
-                {icon}
+                <img
+                    src={`http://localhost:8080/uploads/${icon}`}
+                    alt={`${text}'s server icon`}
+                />
             </div>
             <span className="sidebar-tooltip">
                 {text}
@@ -15,4 +18,4 @@ const SideBarIcon = ({ icon, text,  onClick }) => {
     );
 };
 
-export default SideBarIcon; 
+export default ServerBarIcon;

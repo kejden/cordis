@@ -11,9 +11,11 @@ import toast from "react-hot-toast";
 import { BASE_API_URL } from "../config/api.js";
 import { createMessage, getAllMessages } from "../Redux/Message/Action.js";
 import { updateLatestChats } from "../Redux/Chat/Action.js";
+import {getAllServers} from "../Redux/Server/Action.js";
+import {GET_ALL_SERVERS} from "../Redux/Server/ActionType.js";
 
 const DisplayPage = () => {
-    const { auth, message, chat } = useSelector((store) => store);
+    const { auth, chat, message, server} = useSelector((store) => store);
     const dispatch = useDispatch();
 
     const [chatOpen, setChatOpen] = useState(false);
@@ -38,6 +40,7 @@ const DisplayPage = () => {
     useEffect(() => {
         connect();
         fetchLatestChats();
+        fetchServers();
     }, []);
 
     useEffect(() => {
@@ -149,9 +152,18 @@ const DisplayPage = () => {
         }
     };
 
+    const fetchServers = async () => {
+        try {
+            await dispatch(getAllServers());
+        } catch (error) {
+            toast.error("Error fetching servers.");
+            console.error("Error fetching servers:", error);
+        }
+    };
+
     return (
         <>
-            <ServerBar />
+            <ServerBar servers={server.servers} />
             <div className="flex h-screen">
                 <FriendSideBar
                     latestChats={localLatestChats}

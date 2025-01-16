@@ -1,16 +1,20 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import SideBarIcon from "./SideBarIcon.jsx";
 import {CgDice1, CgDice2, CgDice3, CgDice4, CgDice5} from "react-icons/cg";
 import {FaPlus} from "react-icons/fa";
 import axios from "axios";
 import {BASE_API_URL} from "../../config/api.js";
+import { createNewServer } from "../../Redux/Server/Action.js";
 import toast from "react-hot-toast";
+import {useDispatch} from "react-redux";
+import ServerBarIcon from "./ServerBarIcon.jsx";
 
-const ServerBar = () => {
+const ServerBar = ({servers}) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [serverName, setServerName] = useState("");
     const [serverImage, setServerImage] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
+    const dispatch = useDispatch();
 
     const openDialog = () => setIsDialogOpen(true);
     const closeDialog = () => {
@@ -41,35 +45,42 @@ const ServerBar = () => {
     };
 
     const handleCreateServer = async () => {
+        if (!serverName || !serverImage) {
+            toast.error("Server name and image are required.");
+            return;
+        }
+
         try {
-            const response = await axios.post(
-                `${BASE_API_URL}/api/server`,
-                { name: serverName, image: serverImage },
-                { withCredentials: true }
-            );
-            if(response.status === 200){
-                closeDialog();
-                toast.success("Server created successfully.");
-            }
+            await dispatch(createNewServer({ name: serverName, image: serverImage }));
+            toast.success("Server created successfully.");
+            closeDialog();
         } catch (error) {
-            toast.error("Error creating server");
-            console.error("Error creating server: " + error)
+            console.error("Error in handleCreateServer: ", error);
         }
     };
 
     return (
         <>
             <div
-                className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-950 text-white shadow-lg justify-between">
+                className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-950 text-white shadow-lg justify-between"
+            >
                 <div>
-                    <SideBarIcon icon={<CgDice1 />} />
-                    <SideBarIcon icon={<CgDice2 />} />
-                    <SideBarIcon icon={<CgDice3 />} />
-                    <SideBarIcon icon={<CgDice4 />} />
-                    <SideBarIcon icon={<CgDice5 />} />
+                    <SideBarIcon icon={<CgDice1/>}/>
+
+                    {servers && servers.length > 0 ? (
+                        servers.map((server) => (
+                            <ServerBarIcon
+                                key={server.id}
+                                icon={server.image}
+                                text={server.name}
+                            />
+                        ))
+                    ) : (
+                        <p>No servers available</p>
+                    )}
                 </div>
                 <div>
-                    <SideBarIcon icon={<FaPlus />} onClick={openDialog} />
+                    <SideBarIcon icon={<FaPlus/>} onClick={openDialog}/>
                 </div>
             </div>
 
