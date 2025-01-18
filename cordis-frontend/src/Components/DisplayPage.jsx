@@ -12,13 +12,15 @@ import { BASE_API_URL } from "../config/api.js";
 import { createMessage, getAllMessages } from "../Redux/Message/Action.js";
 import { updateLatestChats } from "../Redux/Chat/Action.js";
 import {getAllServers} from "../Redux/Server/Action.js";
-import {GET_ALL_SERVERS} from "../Redux/Server/ActionType.js";
+import ServerSideBar from "./Server/ServerSideBar.jsx";
 
 const DisplayPage = () => {
     const { auth, chat, message, server} = useSelector((store) => store);
     const dispatch = useDispatch();
 
     const [chatOpen, setChatOpen] = useState(false);
+    const [serverOpen, setServerOpen] = useState(false);
+    const [openedServer, setOpenedServer] = useState(null);
     const [chatWindow, setChatWindow] = useState(null);
     const [stompClient, setStompClient] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
@@ -161,17 +163,32 @@ const DisplayPage = () => {
         }
     };
 
+    const openServer = (serverId) => {
+        console.log("Opening server with ID:", serverId);
+        setServerOpen(true);
+        setOpenedServer(serverId);
+    };
+
+    const closeServer = () => {
+        console.log("Server closed");
+        setServerOpen(false);
+        setOpenedServer(null);
+    };
+
     return (
         <>
-            <ServerBar servers={server.servers} />
+            <ServerBar servers={server.servers} openServer={openServer} closeServer={closeServer} />
             <div className="flex h-screen">
-                <FriendSideBar
+                {!serverOpen ? (<FriendSideBar
                     latestChats={localLatestChats}
                     setChatOpen={setChatOpen}
                     setChatWindow={setChatWindow}
                     setIsGroup={() => setIsGroup(false)}
-                />
-                {!chatOpen && (
+                />) : (
+                    <ServerSideBar
+                    />
+                )}
+                {!serverOpen && !chatOpen && (
                     <FriendManager
                         setChatOpen={setChatOpen}
                         setChatWindow={setChatWindow}

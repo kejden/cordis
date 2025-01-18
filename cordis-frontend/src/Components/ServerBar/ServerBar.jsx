@@ -8,8 +8,9 @@ import { createNewServer } from "../../Redux/Server/Action.js";
 import toast from "react-hot-toast";
 import {useDispatch} from "react-redux";
 import ServerBarIcon from "./ServerBarIcon.jsx";
+import {IoHomeSharp} from "react-icons/io5";
 
-const ServerBar = ({servers}) => {
+const ServerBar = ({servers, openServer, closeServer}) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [serverName, setServerName] = useState("");
     const [serverImage, setServerImage] = useState("");
@@ -22,6 +23,11 @@ const ServerBar = ({servers}) => {
         setServerName("");
         setServerImage("");
         setSelectedFile(null);
+    };
+
+    const handleOpenServer = (serverId) => {
+        console.log("Server ID clicked:", serverId);
+        openServer(serverId);
     };
 
     const handleFileUpload = async () => {
@@ -65,14 +71,15 @@ const ServerBar = ({servers}) => {
                 className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-950 text-white shadow-lg justify-between"
             >
                 <div>
-                    <SideBarIcon icon={<CgDice1/>}/>
-
+                    <SideBarIcon icon={<IoHomeSharp/>} onClick={closeServer}/>
+                    <div className="border-b border-gray-600 my-2"/>
                     {servers && servers.length > 0 ? (
                         servers.map((server) => (
                             <ServerBarIcon
                                 key={server.id}
                                 icon={server.image}
                                 text={server.name}
+                                onClick={() => handleOpenServer(server.id)}
                             />
                         ))
                     ) : (
