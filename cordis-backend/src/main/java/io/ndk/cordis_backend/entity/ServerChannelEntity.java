@@ -12,19 +12,18 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ServerEntity {
+public class ServerChannelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "server_id")
+    private ServerEntity server;
+
     private String name;
 
-    private String image;
-
-    @ManyToOne
-    private UserEntity owner;
-
-    @OneToMany
-    private List<ServerChannelEntity> channels = new ArrayList<>();
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServerMessageEntity> messages = new ArrayList<>();
 }
