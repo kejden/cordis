@@ -5,13 +5,16 @@ import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.MessageRequest;
 import io.ndk.cordis_backend.dto.response.MessageResponse;
 import io.ndk.cordis_backend.entity.DirectMessageEntity;
+import io.ndk.cordis_backend.entity.ServerMessageEntity;
 import io.ndk.cordis_backend.entity.UserEntity;
 import io.ndk.cordis_backend.handler.BusinessErrorCodes;
 import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.repository.DirectMessageRepository;
+import io.ndk.cordis_backend.repository.ServerMessageRepository;
 import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.MessageService;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.Server;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,22 +30,38 @@ import java.util.stream.Collectors;
 public class MessageServiceImpl implements MessageService {
 
     private final DirectMessageRepository messageRepository;
+    private final ServerMessageRepository serverMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final Mapper<DirectMessageEntity, MessageResponse> mapper;
+    private final Mapper<ServerMessageEntity, MessageResponse> serverMessagemapper;
 
     @Override
     public MessageResponse saveMessage(MessageRequest messageDto) {
-        DirectMessageEntity message = DirectMessageEntity.builder()
-                .content(messageDto.getContent())
-                .sender(getUser(messageDto.getUserId()))
-                .timestamp(LocalDateTime.now())
-                .chatId(messageDto.getChatId())
-                .build();
-        DirectMessageEntity savedMessage = messageRepository.save(message);
-        MessageResponse messageResponse = mapper.mapTo(savedMessage);
-        messagingTemplate.convertAndSend("/user/" + message.getChatId(), messageResponse);
-        return messageResponse;
+        if(messageDto.isGroup()){
+            ServerMessageEntity message = ServerMessageEntity.builder()
+                    .content(messageDto.getContent())
+                    .sender(getUser(messageDto.getUserId()))
+                    .timestamp(LocalDateTime.now())
+                    .chatId(messageDto.getChatId())
+                    .build();
+            ServerMessageEntity save = serverMessageRepository.save(message);
+            MessageResponse mr = serverMessagemapper.mapTo(save);
+            messagingTemplate.convertAndSend("/group/" + message.getChatId(), mr);
+            return mr;
+        }else{
+            DirectMessageEntity message = DirectMessageEntity.builder()
+                    .content(messageDto.getContent())
+                    .sender(getUser(messageDto.getUserId()))
+                    .timestamp(LocalDateTime.now())
+                    .chatId(messageDto.getChatId())
+                    .build();
+            DirectMessageEntity savedMessage = messageRepository.save(message);
+            MessageResponse messageResponse = mapper.mapTo(savedMessage);
+            messagingTemplate.convertAndSend("/user/" + message.getChatId(), messageResponse);
+            return messageResponse;
+        }
+
     }
 
 //    @Override
@@ -53,6 +72,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public List<MessageResponse> getMessages(Long chatId) {
         return messageRepository.findByChatId(chatId).stream().map(mapper::mapTo).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MessageResponse> getGroupMessages(Long chatId) {
+        return serverMessageRepository.findByChatId(chatId).stream().map(serverMessagemapper::mapTo).collect(Collectors.toList());
     }
 
     private UserEntity getUser(Long id) {

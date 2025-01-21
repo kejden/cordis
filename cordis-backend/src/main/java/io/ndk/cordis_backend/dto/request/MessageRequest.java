@@ -11,4 +11,5 @@ public class MessageRequest {
     private Long chatId;
     private Long userId;
     private String content;
+    private boolean isGroup;
 }
