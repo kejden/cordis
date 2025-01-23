@@ -38,7 +38,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public MessageResponse saveMessage(MessageRequest messageDto) {
-        if(messageDto.isGroup()){
+        System.out.println(messageDto);
+        if(messageDto.getGroup()){
             ServerMessageEntity message = ServerMessageEntity.builder()
                     .content(messageDto.getContent())
                     .sender(getUser(messageDto.getUserId()))

@@ -11,6 +11,9 @@ import io.ndk.cordis_backend.service.ServerChannelService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @Service
 public class ServerChannelServiceimpl implements ServerChannelService {
@@ -21,6 +24,11 @@ public class ServerChannelServiceimpl implements ServerChannelService {
     private final ServerRepository serverRepository;
     private final Mapper<ServerChannelEntity, ServerChannelDto> mapper;
     private final MemberRolesRepository memberRolesRepository;
+
+    @Override
+    public List<ServerChannelDto> getByServerId(Long id) {
+        return repository.findByServerId(id).stream().map(mapper::mapTo).collect(Collectors.toList());
+    }
 
     @Override
     public ServerChannelDto create(CreateServerChannel dto, String email) {

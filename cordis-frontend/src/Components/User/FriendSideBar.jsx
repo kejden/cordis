@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import UserCard from "./UserCard.jsx";
 import Status from "./Status.jsx";
 
-const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow, setIsGroup }) => {
+const FriendSideBar = ({ latestChats, setChatOpen, setChatWindow }) => {
 
     return (
         <>

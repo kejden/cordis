@@ -4,6 +4,7 @@ import axios from "axios";
 
 export const createMessage = (data) => async (dispatch) => {
     try {
+        console.log(data)
         const res = await axios.post(
             `${BASE_API_URL}/api/messages/create`, data, {withCredentials: true,}
         );
@@ -15,9 +16,14 @@ export const createMessage = (data) => async (dispatch) => {
 
 export const getAllMessages = (reqData) => async (dispatch) => {
     try {
-        const res = await axios.get(
-            `${BASE_API_URL}/api/messages/${reqData.chatId}`, {withCredentials: true,}
-        );
+        let endpoint;
+        if (reqData.isServerChannel) {
+            endpoint = `${BASE_API_URL}/api/server-messages/${reqData.chatId}`;
+        } else {
+            endpoint = `${BASE_API_URL}/api/messages/${reqData.chatId}`;
+        }
+
+        const res = await axios.get(endpoint, { withCredentials: true });
         dispatch({ type: GET_ALL_MESSAGE, payload: res.data });
     } catch (error) {
         console.error("Error while fetching messages: ", error.response || error);

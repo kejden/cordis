@@ -35,7 +35,7 @@ const DisplayPage = () => {
 
     useEffect(() => {
         if (chatWindow) {
-            dispatch(getAllMessages({ chatId: chatWindow }));
+            dispatch(getAllMessages({ chatId: chatWindow, isServerChannel: isGroup }));
         }
     }, [chatWindow]);
 
@@ -53,7 +53,7 @@ const DisplayPage = () => {
 
     useEffect(() => {
         if (chatWindow  && message?.newMessage) {
-            dispatch(getAllMessages({ chatId: chatWindow }));
+            dispatch(getAllMessages({ chatId: chatWindow, isServerChannel: isGroup }));
         }
     }, [chatWindow, message.newMessage]);
 
@@ -122,7 +122,7 @@ const DisplayPage = () => {
 
     const handleCreateNewMessage = (content) => {
         dispatch(
-            createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id })
+            createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id, group: isGroup }),
         );
         setContent("");
         updateChatOrder(chatWindow);
@@ -164,15 +164,22 @@ const DisplayPage = () => {
     };
 
     const openServer = (serverId) => {
-        console.log("Opening server with ID:", serverId);
         setServerOpen(true);
+        setIsGroup(true);
         setOpenedServer(serverId);
+        setChatOpen(false);
     };
 
     const closeServer = () => {
-        console.log("Server closed");
         setServerOpen(false);
+        setIsGroup(false);
         setOpenedServer(null);
+        setChatOpen(false);
+    };
+
+    const handleChannelClick = (channel) => {
+        setChatWindow(channel.id);
+        setChatOpen(true);
     };
 
     return (
@@ -183,16 +190,16 @@ const DisplayPage = () => {
                     latestChats={localLatestChats}
                     setChatOpen={setChatOpen}
                     setChatWindow={setChatWindow}
-                    setIsGroup={() => setIsGroup(false)}
                 />) : (
                     <ServerSideBar
+                        server={openedServer}
+                        onChannelClick={handleChannelClick}
                     />
                 )}
                 {!serverOpen && !chatOpen && (
                     <FriendManager
                         setChatOpen={setChatOpen}
                         setChatWindow={setChatWindow}
-                        setIsGroup={() => setIsGroup(false)}
                     />
                 )}
                 {chatOpen && (

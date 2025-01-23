@@ -3,9 +3,6 @@ package io.ndk.cordis_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -23,7 +20,4 @@ public class ServerChannelEntity {
     private ServerEntity server;
 
     private String name;
-
-    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ServerMessageEntity> messages = new ArrayList<>();
 }

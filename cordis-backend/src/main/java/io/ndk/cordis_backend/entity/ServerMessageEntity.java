@@ -17,7 +17,6 @@ public class ServerMessageEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-
     @Column(nullable = false)
     private Long chatId;
 
