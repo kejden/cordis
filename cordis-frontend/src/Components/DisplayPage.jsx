@@ -13,6 +13,7 @@ import { createMessage, getAllMessages } from "../Redux/Message/Action.js";
 import { updateLatestChats } from "../Redux/Chat/Action.js";
 import {getAllServers} from "../Redux/Server/Action.js";
 import ServerSideBar from "./Server/ServerSideBar.jsx";
+import ServerUsers from "./Server/ServerUsers.jsx";
 
 const DisplayPage = () => {
     const { auth, chat, message, server} = useSelector((store) => store);
@@ -185,7 +186,7 @@ const DisplayPage = () => {
     return (
         <>
             <ServerBar servers={server.servers} openServer={openServer} closeServer={closeServer} />
-            <div className="flex h-screen">
+            <div className="flex h-screen bg-gray-800">
                 {!serverOpen ? (<FriendSideBar
                     latestChats={localLatestChats}
                     setChatOpen={setChatOpen}
@@ -209,6 +210,12 @@ const DisplayPage = () => {
                         onClose={() => setChatOpen(false)}
                     />
                 )}
+                <div className="ml-auto">
+                    {serverOpen && (
+                        <ServerUsers serverId={openedServer} />
+                    )}
+                </div>
+
             </div>
         </>
     );

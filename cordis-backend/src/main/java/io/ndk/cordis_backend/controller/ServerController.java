@@ -1,8 +1,10 @@
 package io.ndk.cordis_backend.controller;
 
 import io.ndk.cordis_backend.dto.ServerDto;
+import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.ServerCreate;
 import io.ndk.cordis_backend.dto.response.ServerResponse;
+import io.ndk.cordis_backend.dto.response.UserRole;
 import io.ndk.cordis_backend.service.ServerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,30 +23,42 @@ public class ServerController {
     private final ServerService serverService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServerDto> getServerById(@PathVariable Long id) {
-        ServerDto serverDto = serverService.getServerById(id);
-        return ResponseEntity.ok(serverDto);
+    public ResponseEntity<ServerDto> getServerById(
+            @PathVariable Long id) {
+        return new ResponseEntity<>(serverService.getServerById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/users")
+    public ResponseEntity<List<UserRole>> getServerUsers(
+            @PathVariable Long id) {
+        return new ResponseEntity<>(serverService.getUsersOfServer(id), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<ServerResponse>> getAllServersOfUSer(Principal principal) {
+    public ResponseEntity<List<ServerResponse>> getAllServersOfUSer(
+            Principal principal) {
         return new ResponseEntity<>(serverService.getAllServerOfUser(principal.getName()), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<ServerDto> createServer(@RequestBody ServerCreate dto, Principal principal) {
-        ServerDto createdServer = serverService.createServer(dto, principal.getName());
-        return new ResponseEntity<>(createdServer, HttpStatus.CREATED);
+    public ResponseEntity<ServerDto> createServer(
+            @RequestBody ServerCreate dto,
+            Principal principal) {
+        return new ResponseEntity<>(serverService.createServer(dto, principal.getName()), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServerDto> updateServer(@PathVariable Long id, @RequestBody ServerDto dto, Principal principal) {
-        ServerDto updatedServer = serverService.updateServer(id, dto, principal.getName());
-        return new ResponseEntity<>(updatedServer, HttpStatus.OK);
+    public ResponseEntity<ServerDto> updateServer(
+            @PathVariable Long id,
+            @RequestBody ServerDto dto,
+            Principal principal) {
+        return new ResponseEntity<>(serverService.updateServer(id, dto, principal.getName()), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteServer(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<Void> deleteServer(
+            @PathVariable Long id,
+            Principal principal) {
         serverService.deleteServer(id, principal.getName());
         return ResponseEntity.noContent().build();
     }

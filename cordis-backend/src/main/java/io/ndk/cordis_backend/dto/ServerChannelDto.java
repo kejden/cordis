@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class ServerChannelDto {
     private Long id;
-    private ServerDto server;
+//    private ServerDto server;
     private String name;
 }

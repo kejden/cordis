@@ -3,8 +3,10 @@ package io.ndk.cordis_backend.service.impl;
 import io.ndk.cordis_backend.Mappers.Mapper;
 import io.ndk.cordis_backend.dto.RoleDto;
 import io.ndk.cordis_backend.dto.ServerDto;
+import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.ServerCreate;
 import io.ndk.cordis_backend.dto.response.ServerResponse;
+import io.ndk.cordis_backend.dto.response.UserRole;
 import io.ndk.cordis_backend.entity.MemberRolesEntity;
 import io.ndk.cordis_backend.entity.RoleEntity;
 import io.ndk.cordis_backend.entity.ServerEntity;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,7 @@ public class ServerServiceImpl implements ServerService {
     private final FileService fileService;
     private final Mapper<ServerEntity, ServerDto> mapper;
     private final Mapper<RoleEntity, RoleDto> roleMapper;
+    private final Mapper<UserEntity, UserDto> userMapper;
 
     @Value("${application.file.cdn}")
     private String cdnBaseUrl;
@@ -45,6 +49,18 @@ public class ServerServiceImpl implements ServerService {
         return mapper.mapTo(serverRepository.findById(id).orElseThrow(
                 () -> new CustomException(BusinessErrorCodes.NO_SUCH_SERVER)
         ));
+    }
+
+    @Override
+    public List<UserRole> getUsersOfServer(Long id) {
+        List<MemberRolesEntity> memberRoles = mbrRepository.findByServerId(id);
+
+        return memberRoles.stream()
+                .map(memberRole -> UserRole.builder()
+                        .user(userMapper.mapTo(memberRole.getUser()))
+                        .role(memberRole.getRole())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override

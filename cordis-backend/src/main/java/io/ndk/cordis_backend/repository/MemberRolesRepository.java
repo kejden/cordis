@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface MemberRolesRepository extends JpaRepository<MemberRolesEntity, Long> {
     Optional<MemberRolesEntity> findByUserIdAndServerId(Long userId, Long serverId);
     List<MemberRolesEntity> findByUserId(Long userId);
+    List<MemberRolesEntity> findByServerId(Long serverId);
     void deleteByUserIdAndServerId(Long userId, Long serverId);
     Boolean existsByUserIdAndServerId(Long userId, Long serverId);
 }
