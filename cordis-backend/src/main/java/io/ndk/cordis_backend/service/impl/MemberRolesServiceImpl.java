@@ -16,6 +16,7 @@ import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.MemberRolesService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -27,14 +28,14 @@ public class MemberRolesServiceImpl implements MemberRolesService {
     private final ServerRepository serverRepository;
     private final RoleRepository roleRepository;
 
-    @Override
-    public MemberRolesDto getMemberRoles(Long serverId, Long userId) {
-        return mapper.mapTo(memberRolesRepository.findByUserIdAndServerId(userId, serverId)
-                .orElseThrow(
-                    () -> new CustomException(BusinessErrorCodes.NO_MEMBER)
-                )
-        );
-    }
+//    @Override
+//    public MemberRolesDto getMemberRoles(Long serverId, Long userId) {
+//        return mapper.mapTo(memberRolesRepository.findByUserIdAndServerId(userId, serverId)
+//                .orElseThrow(
+//                    () -> new CustomException(BusinessErrorCodes.NO_MEMBER)
+//                )
+//        );
+//    }
 
     @Override
     public MemberRolesDto createMemberRoles(CreateMemberRoles dto) {
@@ -59,6 +60,7 @@ public class MemberRolesServiceImpl implements MemberRolesService {
         return mapper.mapTo(memberRolesRepository.save(mbrEntity));
     }
 
+    @Transactional
     @Override
     public void deleteMemberRoles(Long serverId, Long userId) {
         if(memberRolesRepository.existsByUserIdAndServerId(userId, serverId)){

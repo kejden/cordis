@@ -30,6 +30,8 @@ const DisplayPage = () => {
     const [content, setContent] = useState("");
     const [serverName, setServerName] = useState("");
     const [localLatestChats, setLocalLatestChats] = useState([]);
+    const [userRole, setUserRole] = useState(null);
+
 
     useEffect(() => {
         setLocalLatestChats(chat.latestChats || []);
@@ -168,11 +170,25 @@ const DisplayPage = () => {
     const openServer = (serverId) => {
         const selectedServer = server.servers.find((server) => server.id === serverId);
 
+        const fetchUserRole = async (serverID) => {
+            try {
+                const response = await axios.get(`${BASE_API_URL}/api/server/${serverID}/role`, {
+                    withCredentials: true,
+                });
+                setUserRole(response.data.name);
+            } catch (error) {
+                console.error("Error fetching user role:", error);
+                toast.error("Error fetching user role");
+            }
+        };
+
         setServerOpen(true);
         setIsGroup(true);
         setOpenedServer(serverId);
         setChatOpen(false);
         setServerName(selectedServer.name)
+        fetchUserRole(serverId);
+
     };
 
     const closeServer = () => {
@@ -181,6 +197,7 @@ const DisplayPage = () => {
         setOpenedServer(null);
         setChatOpen(false);
         setServerName("")
+        setUserRole(null)
     };
 
     const handleChannelClick = (channel) => {
@@ -201,6 +218,7 @@ const DisplayPage = () => {
                         server={openedServer}
                         onChannelClick={handleChannelClick}
                         serverName={serverName}
+                        role={userRole}
                     />
                 )}
                 {!serverOpen && !chatOpen && (
@@ -218,7 +236,10 @@ const DisplayPage = () => {
                 )}
                 <div className="ml-auto">
                     {serverOpen && (
-                        <ServerUsers serverId={openedServer} />
+                        <ServerUsers
+                            serverId={openedServer}
+                            role={userRole}
+                        />
                     )}
                 </div>
 

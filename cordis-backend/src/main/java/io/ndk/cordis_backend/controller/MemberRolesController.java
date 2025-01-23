@@ -17,10 +17,10 @@ public class MemberRolesController {
 
     private final MemberRolesService memberRolesService;
 
-    @GetMapping("/{serverId}/{userId}")
-    public ResponseEntity<MemberRolesDto> getMemberRoles(@PathVariable Long serverId, @PathVariable Long userId) {
-        return new ResponseEntity<>(memberRolesService.getMemberRoles(serverId, userId), HttpStatus.OK);
-    }
+//    @GetMapping("/{serverId}/{userId}")
+//    public ResponseEntity<MemberRolesDto> getMemberRoles(@PathVariable Long serverId, @PathVariable Long userId) {
+//        return new ResponseEntity<>(memberRolesService.getMemberRoles(serverId, userId), HttpStatus.OK);
+//    }
 
     @PostMapping
     public ResponseEntity<MemberRolesDto> createMemberRoles(@RequestBody CreateMemberRoles dto) {

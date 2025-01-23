@@ -5,11 +5,11 @@ import { BASE_API_URL } from "../../config/api.js";
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import toast from "react-hot-toast";
 
-const ServerSideBar = ({ server, onChannelClick, serverName }) => {
+const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
+    const canEditOrDelete = role === "OWNER" || role === "MODERATOR";
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [channelName, setChannelName] = useState('');
     const [channels, setChannels] = useState([]);
-    const [userRole, setUserRole] = useState(null);
 
     useEffect(() => {
         const fetchServerChannels = async (serverID) => {
@@ -23,21 +23,10 @@ const ServerSideBar = ({ server, onChannelClick, serverName }) => {
             }
         };
 
-        const fetchUserRole = async (serverID) => {
-            try {
-                const response = await axios.get(`${BASE_API_URL}/api/server/${serverID}/role`, {
-                    withCredentials: true,
-                });
-                setUserRole(response.data);
-            } catch (error) {
-                console.error("Error fetching user role:", error);
-                toast.error("Error fetching user role");
-            }
-        };
+
 
         if (server) {
             fetchServerChannels(server);
-            fetchUserRole(server);
         }
     }, [server]);
 
@@ -100,8 +89,6 @@ const ServerSideBar = ({ server, onChannelClick, serverName }) => {
             toast.error("Error deleting channel");
         }
     };
-
-    const canEditOrDelete = userRole?.name === "OWNER" || userRole?.name === "MODERATOR";
 
     return (
         <>
