@@ -5,6 +5,7 @@ import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.ServerCreate;
 import io.ndk.cordis_backend.dto.response.ServerResponse;
 import io.ndk.cordis_backend.dto.response.UserRole;
+import io.ndk.cordis_backend.entity.RoleEntity;
 import io.ndk.cordis_backend.service.ServerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,14 @@ public class ServerController {
     public ResponseEntity<ServerDto> getServerById(
             @PathVariable Long id) {
         return new ResponseEntity<>(serverService.getServerById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/role")
+    public ResponseEntity<RoleEntity> getUserRoles(
+            @PathVariable Long id,
+            Principal principal
+    ){
+        return new ResponseEntity<>(serverService.getUsersRoleForServer(id, principal.getName()), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/users")

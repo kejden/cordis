@@ -52,6 +52,14 @@ public class ServerServiceImpl implements ServerService {
     }
 
     @Override
+    public RoleEntity getUsersRoleForServer(Long id, String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL)
+        );
+        return mbrRepository.findByUserIdAndServerId(user.getId(), id).get().getRole();
+    }
+
+    @Override
     public List<UserRole> getUsersOfServer(Long id) {
         List<MemberRolesEntity> memberRoles = mbrRepository.findByServerId(id);
 
