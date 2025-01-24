@@ -11,21 +11,20 @@ const Register = () => {
         userName: "",
         email: "",
         password: "",
-        confirmpassword: ""
+        // confirmpassword: ""
     });
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        dispatch(register(user))
-            .then(() => {
-                navigate("/login");
-                toast.success("You have registered successfully.");
-            })
-            .catch(() => {
-                toast.error("Failed to register. Please try again.");
-            })
-
+        try {
+            await dispatch(register(user));
+            navigate("/login");
+            toast.success("You have registered successfully.");
+        } catch (error) {
+            console.error("Registration failed:", error);
+            toast.error(error.message || "Failed to register. Please try again.");
+        }
     };
 
     const onChange = (event) =>{
@@ -67,8 +66,8 @@ const Register = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    name="username"
-                                    value={user.username}
+                                    name="userName"
+                                    value={user.userName}
                                     onChange={onChange}
                                     placeholder="Enter your username"
                                     className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -90,18 +89,18 @@ const Register = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">
-                                    CONFIRM PASSWORD
-                                </label>
-                                <input
-                                    type="password"
-                                    name="confirmpassword"
-                                    value={user.confirmpassword}
-                                    onChange={onChange}
-                                    placeholder="Confirm your password"
-                                    className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
-                                />
+                                {/*<label className="block text-sm font-medium text-gray-400 mb-1">*/}
+                                {/*    CONFIRM PASSWORD*/}
+                                {/*</label>*/}
+                                {/*<input*/}
+                                {/*    type="password"*/}
+                                {/*    name="confirmpassword"*/}
+                                {/*    value={user.confirmpassword}*/}
+                                {/*    onChange={onChange}*/}
+                                {/*    placeholder="Confirm your password"*/}
+                                {/*    className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"*/}
+                                {/*    required*/}
+                                {/*/>*/}
                             </div>
                             <button
                                 type="submit"

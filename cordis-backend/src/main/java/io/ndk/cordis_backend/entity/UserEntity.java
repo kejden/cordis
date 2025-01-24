@@ -25,7 +25,7 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, length = 15)
+    @Column(name = "user_name", nullable = false, length = 15)
     private String userName;
 
     @JsonIgnore

@@ -5,15 +5,14 @@ import {LOGIN, REGISTER, REQ_USER} from "./ActionType.js";
 export const register = (data) => async (dispatch) => {
     try {
         const response = await axios.post(`${BASE_API_URL}/auth/sign-up`, data, {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
         });
-        const resData = await response.json();
 
-        console.log("register", resData);
-        dispatch({ type: REGISTER, payload: resData });
+        console.log("register response:", response.data);
+        dispatch({ type: REGISTER, payload: response.data });
     } catch (error) {
-        console.error(`Error: `, error);
-        throw new Error(error.message);
+        console.error("Registration error:", error.response ? error.response.data : error.message);
+        throw new Error(error.response ? error.response.data.message : "Registration failed");
     }
 };
 
