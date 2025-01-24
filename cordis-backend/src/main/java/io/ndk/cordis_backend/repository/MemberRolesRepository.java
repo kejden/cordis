@@ -12,4 +12,5 @@ public interface MemberRolesRepository extends JpaRepository<MemberRolesEntity, 
     List<MemberRolesEntity> findByServerId(Long serverId);
     void deleteByUserIdAndServerId(Long userId, Long serverId);
     Boolean existsByUserIdAndServerId(Long userId, Long serverId);
+    void deleteByServerId(Long serverId);
 }

@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface ServerService {
     ServerDto getServerById(Long id);
+    String joinServer(String invitationKey, String email);
     RoleEntity getUsersRoleForServer(Long id, String email);
     List<UserRole> getUsersOfServer(Long id);
     ServerDto createServer(ServerCreate dto, String email);

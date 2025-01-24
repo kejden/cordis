@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import UserCard from "../User/UserCard.jsx";
 import axios from "axios";
 import { BASE_API_URL } from "../../config/api.js";
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaEllipsisV } from 'react-icons/fa';
 import toast from "react-hot-toast";
 
 const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
     const canEditOrDelete = role === "OWNER" || role === "MODERATOR";
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDashboardOpen, setIsDashboardOpen] = useState(false);
     const [channelName, setChannelName] = useState('');
     const [channels, setChannels] = useState([]);
+    const [invitationKeys, setInvitationKeys] = useState([]);
 
     useEffect(() => {
         const fetchServerChannels = async (serverID) => {
@@ -23,21 +24,23 @@ const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
             }
         };
 
-
+        const fetchActiveInvitationKeys = async (serverID) => {
+            try {
+                const response = await axios.get(`${BASE_API_URL}/api/invitation-keys/active/${serverID}`, {
+                    withCredentials: true,
+                });
+                setInvitationKeys(response.data || []);
+            } catch (error) {
+                console.error("Error fetching invitation keys:", error);
+                toast.error("Error fetching invitation keys");
+            }
+        };
 
         if (server) {
             fetchServerChannels(server);
+            fetchActiveInvitationKeys(server);
         }
     }, [server]);
-
-    const handleOpenDialog = () => {
-        setIsDialogOpen(true);
-    };
-
-    const handleCloseDialog = () => {
-        setIsDialogOpen(false);
-        setChannelName('');
-    };
 
     const handleCreateChannel = async () => {
         try {
@@ -53,10 +56,11 @@ const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
             );
 
             setChannels([...channels, response.data]);
-
-            handleCloseDialog();
+            setChannelName('');
+            toast.success("Channel created successfully");
         } catch (error) {
             console.error('Error creating channel:', error);
+            toast.error("Error creating channel");
         }
     };
 
@@ -90,6 +94,45 @@ const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
         }
     };
 
+    const handleGenerateInvitationKey = async () => {
+        try {
+            const response = await axios.post(
+                `${BASE_API_URL}/api/invitation-keys/generate/${server}`,
+                {},
+                { withCredentials: true }
+            );
+            toast.success("Invitation key generated successfully");
+            const keysResponse = await axios.get(`${BASE_API_URL}/api/invitation-keys/active/${server}`, {
+                withCredentials: true,
+            });
+            setInvitationKeys(keysResponse.data || []);
+        } catch (error) {
+            console.error("Error generating invitation key:", error);
+            toast.error("Error generating invitation key");
+        }
+    };
+
+    const handleDeleteServer = async () => {
+        try {
+            await axios.delete(`${BASE_API_URL}/api/server/${server}`, {
+                withCredentials: true,
+            });
+            toast.success("Server deleted successfully");
+            window.location.reload();
+        } catch (error) {
+            console.error("Error deleting server:", error);
+            toast.error("Error deleting server");
+        }
+    };
+
+    const openDashboard = () => {
+        setIsDashboardOpen(true);
+    };
+
+    const closeDashboard = () => {
+        setIsDashboardOpen(false);
+    };
+
     return (
         <>
             <div className="flex w-1/5">
@@ -99,14 +142,12 @@ const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
                         <div className="flex flex-col p-7 items-center justify-center w-full">
                             <div className="flex items-center justify-between w-full">
                                 <h2 className="text-lg font-semibold text-white">{serverName}</h2>
-                                {canEditOrDelete && (
-                                    <button
-                                        onClick={handleOpenDialog}
-                                        className="text-green-500 hover:text-green-400 transition-colors"
-                                    >
-                                        <FaPlus size={20} />
-                                    </button>
-                                )}
+                                <button
+                                    onClick={openDashboard}
+                                    className="text-gray-400 hover:text-gray-300 transition-colors"
+                                >
+                                    <FaEllipsisV size={20} />
+                                </button>
                             </div>
                         </div>
                         <div className="flex flex-col">
@@ -154,31 +195,73 @@ const ServerSideBar = ({ server, onChannelClick, serverName, role }) => {
                 </div>
             </div>
 
-            {isDialogOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-gray-800 p-6 rounded-lg w-1/3">
-                        <h2 className="text-lg font-semibold mb-4 text-white">Create New Channel</h2>
-                        <input
-                            type="text"
-                            placeholder="Channel Name"
-                            value={channelName}
-                            onChange={(e) => setChannelName(e.target.value)}
-                            className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
-                        />
-                        <div className="flex justify-end">
-                            <button
-                                onClick={handleCloseDialog}
-                                className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleCreateChannel}
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                            >
-                                Create
-                            </button>
+            {isDashboardOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+                    <div className="bg-gray-800 p-6 rounded-md shadow-lg w-[600px]">
+                        <h2 className="text-lg font-semibold mb-4">Server Dashboard</h2>
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                placeholder="Channel Name"
+                                value={channelName}
+                                onChange={(e) => setChannelName(e.target.value)}
+                                className="w-full p-2 mb-4 bg-gray-700 text-white rounded"
+                            />
+                            {canEditOrDelete && (
+                                <button
+                                    onClick={handleCreateChannel}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded mb-4"
+                                >
+                                    Create Channel
+                                </button>
+                            )}
                         </div>
+                        <ul className="max-h-[400px] overflow-y-auto">
+                            {invitationKeys.map((key) => (
+                                <li key={key.id} className="text-white p-4 bg-gray-700 rounded mb-2 flex justify-between items-center">
+                                    <div>
+                                        <span className="text-sm font-medium">{key.invitationKey}</span>
+                                        <span className="text-xs text-gray-400 block mt-1">
+                                            Expires: {new Date(key.expirationTime).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => navigator.clipboard.writeText(key.invitationKey)}
+                                        className="text-gray-400 hover:text-gray-300"
+                                    >
+                                        Copy
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="mt-4">
+                            {canEditOrDelete && (
+                                <button
+                                    onClick={handleGenerateInvitationKey}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded mb-4"
+                                >
+                                    Generate New Key
+                                </button>
+                            )}
+                            {role === "OWNER" && (
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm("Are you sure you want to delete this server?")) {
+                                            handleDeleteServer();
+                                        }
+                                    }}
+                                    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
+                                >
+                                    Delete Server
+                                </button>
+                            )}
+                        </div>
+                        <button
+                            onClick={closeDashboard}
+                            className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded mt-4"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}

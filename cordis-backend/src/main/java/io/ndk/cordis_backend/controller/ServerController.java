@@ -23,6 +23,13 @@ public class ServerController {
 
     private final ServerService serverService;
 
+    @PostMapping("/join")
+    public ResponseEntity<String> acceptServer(
+            @RequestBody String invitationKey,
+            Principal principal) {
+        return new ResponseEntity<>(serverService.joinServer(invitationKey, principal.getName()), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ServerDto> getServerById(
             @PathVariable Long id) {

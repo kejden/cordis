@@ -13,15 +13,14 @@ import io.ndk.cordis_backend.entity.ServerEntity;
 import io.ndk.cordis_backend.entity.UserEntity;
 import io.ndk.cordis_backend.handler.BusinessErrorCodes;
 import io.ndk.cordis_backend.handler.CustomException;
-import io.ndk.cordis_backend.repository.MemberRolesRepository;
-import io.ndk.cordis_backend.repository.RoleRepository;
-import io.ndk.cordis_backend.repository.ServerRepository;
-import io.ndk.cordis_backend.repository.UserRepository;
+import io.ndk.cordis_backend.repository.*;
 import io.ndk.cordis_backend.service.FileService;
+import io.ndk.cordis_backend.service.InvitationKeyService;
 import io.ndk.cordis_backend.service.ServerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -34,8 +33,10 @@ public class ServerServiceImpl implements ServerService {
 
     private final ServerRepository serverRepository;
     private final UserRepository userRepository;
+    private final InvitationKeyService invitationKeyService;
     private final MemberRolesRepository mbrRepository;
     private final RoleRepository roleRepository;
+    private final InvitationKeyRepository InvitationKeyRepository;
     private final FileService fileService;
     private final Mapper<ServerEntity, ServerDto> mapper;
     private final Mapper<RoleEntity, RoleDto> roleMapper;
@@ -50,6 +51,32 @@ public class ServerServiceImpl implements ServerService {
                 () -> new CustomException(BusinessErrorCodes.NO_SUCH_SERVER)
         ));
     }
+
+    @Override
+    public String joinServer(String invitationKey, String email) {
+        if (!invitationKeyService.validateInvitationKey(invitationKey)) {
+            throw new CustomException(BusinessErrorCodes.INCORRECT_INVITE);
+        }
+        UserEntity user = userRepository.findByEmail(email).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL)
+        );
+        Long serverId = invitationKeyService.getServerIdByInvitationKey(invitationKey);
+
+        if(mbrRepository.existsByUserIdAndServerId(user.getId(), serverId)){
+            throw new CustomException(BusinessErrorCodes.USER_ROLE_EXISTS);
+        }
+        ServerEntity server = serverRepository.findById(serverId).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_SERVER)
+        );
+        MemberRolesEntity memberRolesEntity = MemberRolesEntity.builder()
+                .user(user)
+                .server(server)
+                .role(getRoleEntity("USER"))
+                .build();
+        mbrRepository.save(memberRolesEntity);
+        return "SUCCESS";
+    }
+
 
     @Override
     public RoleEntity getUsersRoleForServer(Long id, String email) {
@@ -106,6 +133,7 @@ public class ServerServiceImpl implements ServerService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteServer(Long id, String email) {
         if(serverRepository.existsById(id)) {
@@ -113,7 +141,9 @@ public class ServerServiceImpl implements ServerService {
                     () -> new CustomException(BusinessErrorCodes.NO_SUCH_SERVER)
             );
             if(serverEntity.getOwner().equals(getUserEntity(email))){
+                mbrRepository.deleteByServerId(id);
                 serverRepository.deleteById(id);
+                InvitationKeyRepository.deleteByServerId(id);
             }else{
                 throw new CustomException(BusinessErrorCodes.NO_PERMISSION);
             }
