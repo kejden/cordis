@@ -66,8 +66,11 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
             const response = await axios.post(`${BASE_API_URL}/api/friend/accept/${id}`, {}, {
                 withCredentials: true,
             });
-            if (response.ok) {
-                setAwaitingFriends((prev) => prev.filter((friend) => friend.id !== id));
+            if (response.status === 200) {
+                const acceptedFriend = awaitingFriends.find(friend => friend.id === id);
+
+                setAwaitingFriends(prev => prev.filter(friend => friend.id !== id));
+                setAcceptedFriends(prev => [...prev, acceptedFriend]);
                 fetchAcceptedFriends();
             }
         } catch (error) {
@@ -80,8 +83,9 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
             const response = await axios.delete(`${BASE_API_URL}/api/friend/refuse/${id}`, {
                 withCredentials: true,
             });
-            if (response.ok) {
-                setAwaitingFriends((prev) => prev.filter((friend) => friend.id !== id));
+            if (response.status === 200) {
+                setAwaitingFriends(prev => prev.filter(friend => friend.id !== id));
+                toast.success("Friend request declined");
             }
         } catch (error) {
             console.error("Error refusing friend:", error);
@@ -103,18 +107,19 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
                     withCredentials: true,
                 }
             );
+            console.log(response)
 
-
-            if (response.ok) {
+            if (response.status === 200) {
+                setPendingFriends(prev => [...prev, response.data]);
                 setNewFriendUsername("");
                 setError("");
-                fetchPendingFriends();
+                toast.success("Friend request has been sent")
             } else {
                 setError("Failed to send friend request.");
             }
         } catch (error) {
             console.error("Error adding friend:", error);
-            setError("An error occurred while sending the friend request.");
+            setError("User of such account doesn't exist");
         }
     };
 
@@ -245,7 +250,7 @@ const FriendManager = ({setChatOpen, setChatWindow}) => {
                             placeholder="Enter username to add"
                             value={newFriendUsername}
                             onChange={(e) => setNewFriendUsername(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg w-64"
+                            className="px-4 py-2 border border-gray-300 rounded-lg w-64 text-black"
                         />
                         <button
                             onClick={handleAddFriend}
