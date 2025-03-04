@@ -12,6 +12,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class FriendRequest {
-    @NotBlank
+    @NotBlank(message = "Username is required!")
     private String userName;
 }

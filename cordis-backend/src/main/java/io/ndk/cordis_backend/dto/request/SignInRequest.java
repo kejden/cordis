@@ -14,11 +14,11 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class SignInRequest {
-    @NotBlank
-    @Email
+    @Email(message = "Email is not in a valid format!")
+    @NotBlank(message = "Email is required!")
     private String email;
 
-    @NotBlank
-    @Length(min=8, max= 50)
+    @Length(min=8, max= 15)
+    @NotBlank(message = "Password is required!")
     private String password;
 }

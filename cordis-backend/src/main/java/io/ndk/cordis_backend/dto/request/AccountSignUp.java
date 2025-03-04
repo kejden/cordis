@@ -15,16 +15,16 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class AccountSignUp {
 
-    @NotBlank
-    @Email
+    @Email(message = "Email is not in a valid format!")
+    @NotBlank(message = "Email is required!")
     private String email;
 
-    @NotBlank
     @Length(min=8, max = 15)
     @JsonProperty(access = Access.WRITE_ONLY)
+    @NotBlank(message = "Password is required!")
     private String password;
 
-    @NotBlank
     @Length(min=2, max = 15)
+    @NotBlank(message = "Username is required!")
     private String userName;
 }
