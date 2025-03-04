@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
@@ -18,7 +19,8 @@ public class SignInRequest {
     @NotBlank(message = "Email is required!")
     private String email;
 
-    @Length(min=8, max= 15)
+    @Size(min = 8, message = "Password must have at least 8 characters!")
+    @Size(max = 15, message = "Password can have at most 15 characters!")
     @NotBlank(message = "Password is required!")
     private String password;
 }
