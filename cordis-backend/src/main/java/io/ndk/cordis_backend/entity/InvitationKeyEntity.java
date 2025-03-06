@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class InvitationKeyEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 

@@ -3,6 +3,7 @@ package io.ndk.cordis_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ServerMessageEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -25,6 +26,7 @@ public class ServerMessageEntity {
     private UserEntity sender;
 
     @Column(nullable = false)
+    @Size(min = 1, max = 255)
     private String content;
 
     @Column(nullable = false)

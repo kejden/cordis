@@ -1,8 +1,3 @@
-CREATE TABLE IF NOT EXISTS role_entity (
-   id BIGINT PRIMARY KEY,
-   name VARCHAR(255) NOT NULL
-);
-
 INSERT INTO role_entity (id, name)
 SELECT 1, 'OWNER'
     WHERE NOT EXISTS (

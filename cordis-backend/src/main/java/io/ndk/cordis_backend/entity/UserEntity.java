@@ -5,17 +5,20 @@ import io.ndk.cordis_backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "user_entity")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class UserEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -23,6 +26,7 @@ public class UserEntity {
     private String email;
 
     @Column(nullable = false)
+    @Size(min = 8, max = 15)
     private String password;
 
     @Column(name = "user_name", nullable = false, length = 15)

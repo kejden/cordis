@@ -10,3 +10,13 @@ services:
       POSTGRES_DB: project
     ports:
       - '5432:5432'
+
+  test_db:
+    container_name: cordis-test-db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: project_test
+    ports:
+      - '5433:5432'

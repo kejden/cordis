@@ -37,7 +37,7 @@ public class FriendServiceImpl implements FriendService {
     public void requestFriend(FriendRequest friendRequest, String email) {
         UserEntity sender = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
         UserEntity receiver = userRepository.findByUserName(friendRequest.getUserName()).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
-        FriendEntity friendEntity = new FriendEntity().builder()
+        FriendEntity friendEntity = FriendEntity.builder()
                 .sender(sender)
                 .receiver(receiver)
                 .friendState(FriendState.REQUEST)
