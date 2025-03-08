@@ -121,6 +121,4 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return cdnBaseUrl+imagePath;
     }
-
-
 }
