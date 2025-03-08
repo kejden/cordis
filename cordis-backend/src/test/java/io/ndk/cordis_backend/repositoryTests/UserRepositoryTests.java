@@ -21,7 +21,6 @@ class UserRepositoryTests {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("Should save a UserEntity and retrieve it by email")
     void testSaveAndFindByEmail() {
         String email = "test@example.com";
         String password = "secret123";
@@ -42,5 +41,29 @@ class UserRepositoryTests {
         UserEntity found = userRepository.findByEmail("test@example.com").orElse(null);
         assertNotNull(found, "User should be found by email");
         assertEquals("test_user", found.getUserName());
+    }
+
+    @Test
+    void testSaveAndFindByUserName() {
+        String userName = "unique_user";
+        UserEntity user = UserEntity.builder()
+                .email("unique@example.com")
+                .password("password")
+                .userName(userName)
+                .status(UserStatus.OFFLINE)
+                .build();
+
+        userRepository.save(user);
+        UserEntity found = userRepository.findByUserName(userName).orElse(null);
+
+        assertNotNull(found, "User should be found by userName");
+        assertEquals(userName, found.getUserName());
+        assertEquals(user.getEmail(), found.getEmail()); 
+    }
+
+    @Test
+    void testFindByUserNameNonExistent() {
+        assertTrue(userRepository.findByUserName("no_such_user").isEmpty(),
+                "Should return empty Optional if userName not found");
     }
 }
