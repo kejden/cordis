@@ -7,6 +7,7 @@ import io.ndk.cordis_backend.enums.UserStatus;
 import io.ndk.cordis_backend.repository.ServerChannelRepository;
 import io.ndk.cordis_backend.repository.ServerRepository;
 import io.ndk.cordis_backend.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -29,24 +30,34 @@ public class ServerChannelRepositoryTests {
     @Autowired
     private UserRepository userRepository;
 
+    private UserEntity savedUser;
+    private ServerEntity savedServer;
+
+    @BeforeEach
+    void setUp() {
+        repository.deleteAll();
+        serverRepository.deleteAll();
+        userRepository.deleteAll();
+
+        savedUser = userRepository.save(
+            UserEntity.builder()
+                    .email("test@example.com")
+                    .userName("owner-user")
+                    .password("password")
+                    .status(UserStatus.ONLINE)
+                    .build()
+        );
+
+        savedServer = serverRepository.save(
+            ServerEntity.builder()
+                    .name("Server 1")
+                    .owner(savedUser)
+                    .build()
+        );
+    }
+
     @Test
-    void testFindByServerId(){
-        UserEntity user = UserEntity.builder()
-                .email("email@email.com")
-                .userName("owner-user")
-                .password("password")
-                .status(UserStatus.ONLINE)
-                .build();
-
-        UserEntity saved = userRepository.save(user);
-
-        ServerEntity server = ServerEntity.builder()
-                .name("Server 1")
-                .owner(saved)
-                .build();
-
-        ServerEntity savedServer = serverRepository.save(server);
-
+    void testFindByServerId() {
         ServerChannelEntity channel1 = ServerChannelEntity.builder()
                 .server(savedServer)
                 .name("Channel 1")
@@ -63,30 +74,13 @@ public class ServerChannelRepositoryTests {
         List<ServerChannelEntity> channels = repository.findByServerId(savedServer.getId());
 
         assertTrue(channels.size() == 2);
-        assertTrue(channels.get(0).getName().equals("Channel 1"));
-        assertTrue(channels.get(1).getName().equals("Channel 2"));
+        assertEquals("Channel 1", channels.get(0).getName());
+        assertEquals("Channel 2", channels.get(1).getName());
     }
 
     @Test
-    void testFindByServerIdEmpty(){
-        UserEntity user = UserEntity.builder()
-                .email("email@email.com")
-                .userName("owner-user")
-                .password("password")
-                .status(UserStatus.ONLINE)
-                .build();
-
-        UserEntity saved = userRepository.save(user);
-
-        ServerEntity server = ServerEntity.builder()
-                .name("Server 1")
-                .owner(saved)
-                .build();
-
-        ServerEntity savedServer = serverRepository.save(server);
-
+    void testFindByServerIdEmpty() {
         List<ServerChannelEntity> channels = repository.findByServerId(savedServer.getId());
-
-        assertEquals(channels.size(), 0);
+        assertEquals(0, channels.size());
     }
 }

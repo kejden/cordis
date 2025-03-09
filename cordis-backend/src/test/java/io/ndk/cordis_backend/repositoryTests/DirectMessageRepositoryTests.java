@@ -29,24 +29,26 @@ public class DirectMessageRepositoryTests {
     @Autowired
     private UserRepository userRepository;
 
+    private UserEntity savedUser;
+
     @BeforeEach
     void setUp() {
         directMessageRepository.deleteAll();
         userRepository.deleteAll();
+
+        savedUser = userRepository.save(
+                UserEntity.builder()
+                        .email("email@email.com")
+                        .userName("owner-user")
+                        .password("password")
+                        .status(UserStatus.ONLINE)
+                        .build()
+        );
     }
 
     @Test
     void testFindByChannelId() {
         Long chatId = 1L;
-
-        UserEntity user = UserEntity.builder()
-                .email("email@email.com")
-                .userName("owner-user")
-                .password("password")
-                .status(UserStatus.ONLINE)
-                .build();
-
-        UserEntity savedUser = userRepository.save(user);
 
         DirectMessageEntity msg1 = DirectMessageEntity.builder()
                 .chatId(chatId)
@@ -77,15 +79,6 @@ public class DirectMessageRepositoryTests {
     void testFindByChatId() {
         Long chatId = 2L;
 
-        UserEntity user = UserEntity.builder()
-                .email("email@email.com")
-                .userName("owner-user")
-                .password("password")
-                .status(UserStatus.ONLINE)
-                .build();
-
-        UserEntity savedUser = userRepository.save(user);
-
         DirectMessageEntity msg = DirectMessageEntity.builder()
                 .chatId(chatId)
                 .sender(savedUser)
@@ -103,15 +96,6 @@ public class DirectMessageRepositoryTests {
     @Test
     void testFindTopByChatIdOrderByTimestampDesc() {
         Long chatId = 3L;
-
-        UserEntity user = UserEntity.builder()
-                .email("email@email.com")
-                .userName("owner-user")
-                .password("password")
-                .status(UserStatus.ONLINE)
-                .build();
-
-        UserEntity savedUser = userRepository.save(user);
 
         DirectMessageEntity oldMessage = DirectMessageEntity.builder()
                 .chatId(chatId)
