@@ -2,6 +2,7 @@ package io.ndk.cordis_backend.dto.request;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.Size;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Data
 public class CreateMemberRoles {
     @NotBlank(message = "ServerID is required!")

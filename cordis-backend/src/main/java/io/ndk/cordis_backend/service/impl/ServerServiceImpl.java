@@ -1,6 +1,9 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.Mappers.impl.RoleMapper;
+import io.ndk.cordis_backend.Mappers.impl.ServerMapper;
+import io.ndk.cordis_backend.Mappers.impl.UserDtoMapper;
 import io.ndk.cordis_backend.dto.RoleDto;
 import io.ndk.cordis_backend.dto.ServerDto;
 import io.ndk.cordis_backend.dto.UserDto;
@@ -38,9 +41,9 @@ public class ServerServiceImpl implements ServerService {
     private final RoleRepository roleRepository;
     private final InvitationKeyRepository InvitationKeyRepository;
     private final FileService fileService;
-    private final Mapper<ServerEntity, ServerDto> mapper;
-    private final Mapper<RoleEntity, RoleDto> roleMapper;
-    private final Mapper<UserEntity, UserDto> userMapper;
+    private final ServerMapper mapper;
+    private final RoleMapper roleMapper;
+    private final UserDtoMapper userMapper;
 
     @Value("${application.file.cdn}")
     private String cdnBaseUrl;
