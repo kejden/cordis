@@ -1,6 +1,8 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.Mappers.impl.UserDtoMapper;
+import io.ndk.cordis_backend.Mappers.impl.UserMapperImpl;
 import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.AccountSignUp;
 import io.ndk.cordis_backend.dto.request.EditUserRequest;
@@ -36,8 +38,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final Mapper<UserEntity, AccountSignUp> mapper;
-    private final Mapper<UserEntity, UserDto> userMapper;
+    private final UserMapperImpl mapper; //  Mapper<UserEntity, AccountSignUp>
+    private final UserDtoMapper userMapper; // Mapper<UserEntity, UserDto>
     private final FileService fileService;
 
     @Value("${application.file.cdn}")

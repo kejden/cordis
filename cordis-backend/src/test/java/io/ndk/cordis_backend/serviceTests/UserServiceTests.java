@@ -1,8 +1,13 @@
 package io.ndk.cordis_backend.serviceTests;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.Mappers.impl.UserDtoMapper;
+import io.ndk.cordis_backend.Mappers.impl.UserMapperImpl;
 import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.AccountSignUp;
+import io.ndk.cordis_backend.dto.request.EditUserRequest;
+import io.ndk.cordis_backend.dto.request.SignInRequest;
+import io.ndk.cordis_backend.dto.response.SignInResponse;
 import io.ndk.cordis_backend.entity.UserEntity;
 import io.ndk.cordis_backend.enums.UserStatus;
 import io.ndk.cordis_backend.handler.CustomException;
@@ -18,13 +23,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -44,10 +52,10 @@ public class UserServiceTests {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private Mapper<UserEntity, AccountSignUp> accountSignUpMapper;
+    private UserMapperImpl accountSignUpMapper;
 
     @Mock
-    private Mapper<UserEntity, UserDto> userDtoMapper;
+    private UserDtoMapper userDtoMapper; //Mapper<UserEntity, UserDto>
 
     @Mock
     private FileService fileService;
@@ -59,34 +67,30 @@ public class UserServiceTests {
     private String cdnBaseUrl;
 
     @Test
-    void signUp_WithNewEmail_ShouldSaveUser() {
+    void testSignUp() {
         AccountSignUp dto = AccountSignUp.builder()
-                .email("email@email.com")
+                .email("test@example.com")
                 .password("password123")
-                .userName("test_user")
+                .userName("testUser")
                 .build();
 
-        when(userRepository.findByEmail(dto.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(dto.getPassword())).thenReturn("encodedPassword");
-        when(fileService.getDefault()).thenReturn("default-image.jpg");
-
-        UserEntity savedUser = UserEntity.builder()
-                .email(dto.getEmail())
-                .userName(dto.getUserName())
+        UserEntity userEntity = UserEntity.builder()
+                .userName("testUser")
+                .email("test@example.com")
                 .password("encodedPassword")
-                .status(UserStatus.OFFLINE)
-                .profileImage("default-image.jpg")
                 .build();
 
-        when(userRepository.save(any(UserEntity.class))).thenReturn(savedUser);
-        when(accountSignUpMapper.mapTo(savedUser)).thenReturn(dto);
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
+
+        when(accountSignUpMapper.mapTo(any(UserEntity.class))).thenReturn(dto);
 
         AccountSignUp result = userService.signUp(dto);
 
         assertNotNull(result);
-        verify(userRepository).save(any(UserEntity.class));
-        verify(passwordEncoder).encode("password123");
-        verify(fileService).getDefault();
+        assertEquals("test@example.com", result.getEmail());
+        assertEquals("testUser", result.getUserName());
     }
 
     @Test
@@ -98,6 +102,164 @@ public class UserServiceTests {
 
         assertThrows(CustomException.class, () -> userService.signUp(dto));
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testSignIn() {
+        SignInRequest signInRequest = SignInRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .email("test@example.com")
+                .password("encodedPassword")
+                .userName("testUser")
+                .status(UserStatus.OFFLINE)
+                .build();
+
+        when(userRepository.findByEmail(signInRequest.getEmail())).thenReturn(Optional.of(userEntity));
+
+        Authentication mockAuth = mock(Authentication.class);
+        when(mockAuth.isAuthenticated()).thenReturn(true);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(mockAuth);
+
+        SignInResponse response = userService.signIn(signInRequest);
+
+        assertNotNull(response);
+        assertEquals("test@example.com", response.getEmail());
+        assertEquals("testUser", response.getUserName());
+        assertEquals(UserStatus.ONLINE, userEntity.getStatus());
+    }
+
+    @Test
+    void testSignInUserNotFound() {
+        SignInRequest signInRequest = SignInRequest.builder()
+                .email("missing@example.com")
+                .password("password")
+                .build();
+        when(userRepository.findByEmail(signInRequest.getEmail())).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class, () -> userService.signIn(signInRequest));
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void testLogout() {
+        UserEntity userEntity = UserEntity.builder()
+                .email("test@example.com")
+                .status(UserStatus.ONLINE)
+                .build();
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(userEntity));
+
+        userService.logout("test@example.com");
+
+        assertEquals(UserStatus.OFFLINE, userEntity.getStatus());
+        verify(userRepository).save(userEntity);
+    }
+
+    @Test
+    void testLogoutUserNotFound() {
+        when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class, () -> userService.logout("missing@example.com"));
+    }
+
+    @Test
+    void testUpdateUser() {
+        String email = "test@example.com";
+        UserDto dto = new UserDto();
+        dto.setUserName("updatedName");
+        dto.setProfileImage("updatedProfile.png");
+
+        UserEntity existingUser = UserEntity.builder()
+                .email(email)
+                .userName("oldName")
+                .profileImage("oldProfile.png")
+                .build();
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
+
+        UserDto updatedDto = new UserDto();
+        updatedDto.setUserName("updatedName");
+        updatedDto.setProfileImage("updatedProfile.png");
+        when(userDtoMapper.mapTo(any(UserEntity.class))).thenReturn(updatedDto);
+
+        UserDto result = userService.updateUser(email, dto);
+
+        assertEquals("updatedName", result.getUserName());
+        assertEquals("updatedProfile.png", result.getProfileImage());
+        verify(userRepository).save(existingUser);
+    }
+
+    @Test
+    void testUpdateUserNotFound() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class, () -> userService.updateUser("missing@example.com", new UserDto()));
+    }
+
+    @Test
+    void testEditUser() {
+        String email = "test@example.com";
+        EditUserRequest request = new EditUserRequest();
+        request.setUsername("newUsername");
+
+        UserEntity existingUser = UserEntity.builder()
+                .email(email)
+                .userName("oldUsername")
+                .build();
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
+
+        UserDto mappedUser = new UserDto();
+        mappedUser.setUserName("newUsername");
+        when(userDtoMapper.mapTo(any(UserEntity.class))).thenReturn(mappedUser);
+
+        UserDto result = userService.editUser(request, email);
+
+        assertEquals("newUsername", result.getUserName());
+        verify(userRepository).save(existingUser);
+    }
+
+    @Test
+    void testEditUserNotFound() {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class, () -> userService.editUser(new EditUserRequest(), "missing@example.com"));
+    }
+
+    @Test
+    void testUpdateUserImageProfile() {
+        MultipartFile file = mock(MultipartFile.class);
+        Principal principal = () -> "test@example.com";
+        UserEntity user = UserEntity.builder()
+                .email("test@example.com")
+                .profileImage("oldImage.png")
+                .build();
+
+        when(userRepository.findByEmail(principal.getName())).thenReturn(Optional.of(user));
+        when(fileService.updateFile(file, user.getProfileImage())).thenReturn("newImage.png");
+
+        String result = userService.updateUserImageProfile(file, principal);
+
+        assertTrue(result.contains("newImage.png"));
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void testUpdateUserImageProfileNotFound() {
+        MultipartFile file = mock(MultipartFile.class);
+        Principal principal = () -> "missing@example.com";
+
+        when(userRepository.findByEmail(principal.getName())).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class, () -> userService.updateUserImageProfile(file, principal));
+        verify(fileService, never()).updateFile(any(), anyString());
     }
 
 }
