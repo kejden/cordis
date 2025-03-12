@@ -9,6 +9,7 @@ import io.ndk.cordis_backend.dto.request.SignInRequest;
 import io.ndk.cordis_backend.dto.response.SignInResponse;
 import io.ndk.cordis_backend.entity.UserEntity;
 import io.ndk.cordis_backend.enums.UserStatus;
+import io.ndk.cordis_backend.handler.BusinessErrorCodes;
 import io.ndk.cordis_backend.handler.CustomException;
 import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.FileService;
@@ -142,6 +143,32 @@ public class UserServiceTests {
 
         assertThrows(CustomException.class, () -> userService.signIn(signInRequest));
         verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void testSignInUserBadCredentials() {
+        SignInRequest signInRequest = SignInRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        UserEntity userEntity = UserEntity.builder()
+                .id(1L)
+                .email("test@example.com")
+                .password("encodedPassword")
+                .userName("testUser")
+                .status(UserStatus.OFFLINE)
+                .build();
+
+        when(userRepository.findByEmail(signInRequest.getEmail())).thenReturn(Optional.of(userEntity));
+
+        Authentication mockAuth = mock(Authentication.class);
+        when(mockAuth.isAuthenticated()).thenReturn(false);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(mockAuth);
+
+        CustomException ex = assertThrows(CustomException.class, () -> userService.signIn(signInRequest));
+        assertEquals(BusinessErrorCodes.BAD_CREDENTIALS, ex.getErrorCode());
     }
 
     @Test
