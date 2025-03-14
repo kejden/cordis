@@ -1,6 +1,8 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.Mappers.impl.DirectMessageMapper;
+import io.ndk.cordis_backend.Mappers.impl.ServerMessageMapper;
 import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.MessageRequest;
 import io.ndk.cordis_backend.dto.response.MessageResponse;
@@ -33,12 +35,11 @@ public class MessageServiceImpl implements MessageService {
     private final ServerMessageRepository serverMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
-    private final Mapper<DirectMessageEntity, MessageResponse> mapper;
-    private final Mapper<ServerMessageEntity, MessageResponse> serverMessagemapper;
+    private final DirectMessageMapper mapper;
+    private final ServerMessageMapper serverMessagemapper;
 
     @Override
     public MessageResponse saveMessage(MessageRequest messageDto) {
-        System.out.println(messageDto);
         if(messageDto.getGroup()){
             ServerMessageEntity message = ServerMessageEntity.builder()
                     .content(messageDto.getContent())
