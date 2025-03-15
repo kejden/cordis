@@ -1,6 +1,7 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.Mappers.impl.MemberMapper;
 import io.ndk.cordis_backend.dto.MemberRolesDto;
 import io.ndk.cordis_backend.dto.request.CreateMemberRoles;
 import io.ndk.cordis_backend.entity.MemberRolesEntity;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberRolesServiceImpl implements MemberRolesService {
 
     private final MemberRolesRepository memberRolesRepository;
-    private final Mapper<MemberRolesEntity, MemberRolesDto> mapper;
+    private final MemberMapper mapper;
     private final UserRepository userRepository;
     private final ServerRepository serverRepository;
     private final RoleRepository roleRepository;
