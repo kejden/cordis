@@ -1,6 +1,8 @@
 package io.ndk.cordis_backend.service.impl;
 
 import io.ndk.cordis_backend.Mappers.Mapper;
+import io.ndk.cordis_backend.Mappers.impl.FriendMapperImpl;
+import io.ndk.cordis_backend.Mappers.impl.UserDtoMapper;
 import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.FriendRequest;
 import io.ndk.cordis_backend.dto.response.FriendResponse;
@@ -30,8 +32,8 @@ public class FriendServiceImpl implements FriendService {
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
     private final DirectMessageRepository directMessageRepository;
-    private final Mapper<FriendEntity, FriendResponse> mapper;
-    private final Mapper<UserEntity, UserDto> userMapper;
+    private final FriendMapperImpl mapper;
+    private final UserDtoMapper userMapper;
 
     @Override
     public void requestFriend(FriendRequest friendRequest, String email) {
