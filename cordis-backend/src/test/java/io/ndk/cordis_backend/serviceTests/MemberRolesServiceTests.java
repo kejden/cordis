@@ -93,6 +93,57 @@ public class MemberRolesServiceTests {
     }
 
     @Test
+    void createMemberRoles_ShouldThrowExceptionIfUserDoesNotExist() {
+        CreateMemberRoles dto = CreateMemberRoles.builder()
+                .serverId(1L).memberId(2L).build();
+        when(memberRolesRepository.existsByUserIdAndServerId(2L, 1L)).thenReturn(false);
+        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+
+        CustomException ex = assertThrows(
+                CustomException.class,
+                () -> memberRolesService.createMemberRoles(dto)
+        );
+        assertEquals(BusinessErrorCodes.NO_SUCH_EMAIL, ex.getErrorCode());
+    }
+
+    @Test
+    void createMemberRoles_ShouldThrowExceptionIfServerDoesNotExist() {
+        CreateMemberRoles dto = CreateMemberRoles.builder()
+                .serverId(1L).memberId(2L).build();
+        UserEntity user = UserEntity.builder()
+                .id(2L).build();
+        when(memberRolesRepository.existsByUserIdAndServerId(2L, 1L)).thenReturn(false);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+        when(serverRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CustomException ex = assertThrows(
+                CustomException.class,
+                () -> memberRolesService.createMemberRoles(dto)
+        );
+        assertEquals(BusinessErrorCodes.NO_SUCH_SERVER, ex.getErrorCode());
+    }
+
+    @Test
+    void createMemberRoles_ShouldThrowExceptionIfRoleDoesNotExist() {
+        CreateMemberRoles dto = CreateMemberRoles.builder()
+                .serverId(1L).memberId(2L).build();
+        UserEntity user = UserEntity.builder()
+                .id(2L).build();
+        ServerEntity server = ServerEntity.builder()
+                .id(1L).build();
+        when(memberRolesRepository.existsByUserIdAndServerId(2L, 1L)).thenReturn(false);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+        when(serverRepository.findById(1L)).thenReturn(Optional.of(server));
+        when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
+
+        CustomException ex = assertThrows(
+                CustomException.class,
+                () -> memberRolesService.createMemberRoles(dto)
+        );
+        assertEquals(BusinessErrorCodes.NO_SUCH_ROLE, ex.getErrorCode());
+    }
+
+    @Test
     void updateMemberRoles_Success() {
         CreateMemberRoles dto = CreateMemberRoles.builder().serverId(1L).memberId(2L).role("ADMIN").build();
         MemberRolesEntity existing = MemberRolesEntity.builder().id(5L).build();
