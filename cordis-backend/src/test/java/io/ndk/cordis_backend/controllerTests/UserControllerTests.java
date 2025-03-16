@@ -30,6 +30,7 @@ import java.security.Principal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,7 +70,7 @@ public class UserControllerTests {
         UserDto resultDto = UserDto.builder()
                 .userName("NewUser").email("test@example.com").build();
 
-        Mockito.when(userService.editUser(any(EditUserRequest.class), eq("testUser@example.com")))
+        when(userService.editUser(any(EditUserRequest.class), eq("testUser@example.com")))
                .thenReturn(resultDto);
 
         mockMvc.perform(post("/profile/edit")
@@ -93,7 +94,7 @@ public class UserControllerTests {
                 "some_fake_image_bytes".getBytes()
         );
 
-        Mockito.when(userService.updateUserImageProfile(
+        when(userService.updateUserImageProfile(
                 any(MultipartFile.class),
                 any(Principal.class))
         ).thenReturn("http://cdn.example.com/test.png");

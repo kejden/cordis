@@ -30,6 +30,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(controllers = FriendController.class)
@@ -73,7 +74,7 @@ public class FriendControllerTests {
     void testGetFriendResponses() throws Exception {
         FriendResponse friendResponse = FriendResponse.builder().id(1L).state("ACCEPT").build();
         List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
-        Mockito.when(friendService.getFriendResponse(anyString())).thenReturn(friendResponses);
+        when(friendService.getFriendResponse(anyString())).thenReturn(friendResponses);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/responses"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -86,7 +87,7 @@ public class FriendControllerTests {
     void testGetPendingFriendRequests() throws Exception {
         FriendResponse friendResponse = FriendResponse.builder().id(1L).state("REQUEST").build();
         List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
-        Mockito.when(friendService.getPendingFriendResponse(anyString())).thenReturn(friendResponses);
+        when(friendService.getPendingFriendResponse(anyString())).thenReturn(friendResponses);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/pending"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -99,7 +100,7 @@ public class FriendControllerTests {
     void testGetAwaitingFriendRequests() throws Exception {
         FriendResponse friendResponse = FriendResponse.builder().id(1L).state("REQUEST").build();
         List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
-        Mockito.when(friendService.getAwaitingFriendResponse(anyString())).thenReturn(friendResponses);
+        when(friendService.getAwaitingFriendResponse(anyString())).thenReturn(friendResponses);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/awaiting"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -136,7 +137,7 @@ public class FriendControllerTests {
     void testLatestChats() throws Exception {
         FriendResponse friendResponse = FriendResponse.builder().id(1L).state("ACCEPT").build();
         List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
-        Mockito.when(friendService.latestChats(anyString())).thenReturn(friendResponses);
+        when(friendService.latestChats(anyString())).thenReturn(friendResponses);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/latestChats"))
                 .andExpect(MockMvcResultMatchers.status().isOk())

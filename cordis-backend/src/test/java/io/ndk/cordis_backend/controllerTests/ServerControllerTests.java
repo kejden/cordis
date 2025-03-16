@@ -37,6 +37,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(controllers = ServerController.class)
@@ -67,7 +68,7 @@ public class ServerControllerTests {
     @Test
     @WithMockUser(username = "testUser@example.com")
     void testAcceptServer() throws Exception {
-        Mockito.when(serverService.joinServer(anyString(), anyString())).thenReturn("SUCCESS");
+        when(serverService.joinServer(anyString(), anyString())).thenReturn("SUCCESS");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/server/join")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -81,7 +82,7 @@ public class ServerControllerTests {
     @WithMockUser(username = "testUser@example.com")
     void testGetServerById() throws Exception {
         ServerDto serverDto = ServerDto.builder().id(1L).name("Test Server").build();
-        Mockito.when(serverService.getServerById(anyLong())).thenReturn(serverDto);
+        when(serverService.getServerById(anyLong())).thenReturn(serverDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/server/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -93,7 +94,7 @@ public class ServerControllerTests {
     @WithMockUser(username = "testUser@example.com")
     void testGetUserRoles() throws Exception {
         RoleEntity roleEntity = RoleEntity.builder().id(1L).name("USER").build();
-        Mockito.when(serverService.getUsersRoleForServer(anyLong(), anyString())).thenReturn(roleEntity);
+        when(serverService.getUsersRoleForServer(anyLong(), anyString())).thenReturn(roleEntity);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/server/1/role"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -109,7 +110,7 @@ public class ServerControllerTests {
                 .role(RoleEntity.builder().id(1L).name("USER").build())
                 .build();
         List<UserRole> userRoles = Collections.singletonList(userRole);
-        Mockito.when(serverService.getUsersOfServer(anyLong())).thenReturn(userRoles);
+        when(serverService.getUsersOfServer(anyLong())).thenReturn(userRoles);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/server/1/users"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -129,7 +130,7 @@ public class ServerControllerTests {
                 .role(RoleDto.builder().id(1L).name("OWNER").build())
                 .build();
         List<ServerResponse> serverResponses = Collections.singletonList(serverResponse);
-        Mockito.when(serverService.getAllServerOfUser(anyString())).thenReturn(serverResponses);
+        when(serverService.getAllServerOfUser(anyString())).thenReturn(serverResponses);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/server"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -143,7 +144,7 @@ public class ServerControllerTests {
     @WithMockUser(username = "testUser@example.com")
     void testCreateServer() throws Exception {
         ServerDto serverDto = ServerDto.builder().id(1L).name("Test Server").build();
-        Mockito.when(serverService.createServer(any(ServerCreate.class), anyString())).thenReturn(serverDto);
+        when(serverService.createServer(any(ServerCreate.class), anyString())).thenReturn(serverDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/server")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +158,7 @@ public class ServerControllerTests {
     @WithMockUser(username = "testUser@example.com")
     void testUpdateServer() throws Exception {
         ServerDto serverDto = ServerDto.builder().id(1L).name("Updated Server").build();
-        Mockito.when(serverService.updateServer(anyLong(), any(ServerDto.class), anyString())).thenReturn(serverDto);
+        when(serverService.updateServer(anyLong(), any(ServerDto.class), anyString())).thenReturn(serverDto);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/server/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -185,7 +186,7 @@ public class ServerControllerTests {
                 "test image content".getBytes()
         );
 
-        Mockito.when(serverService.updateServerImage(any(), anyLong(), anyString())).thenReturn("imagePath");
+        when(serverService.updateServerImage(any(), anyLong(), anyString())).thenReturn("imagePath");
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PUT, "/api/server/1/image")
                 .file(imageFile)
