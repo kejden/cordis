@@ -35,4 +35,10 @@ public class MessageController {
     public ResponseEntity<?> getMessages(@PathVariable Long channelId){
         return new ResponseEntity<>(messageService.getMessages(channelId), HttpStatus.OK);
     }
+
+    @PutMapping("/edit/{messageId}")
+    public ResponseEntity<MessageResponse> editMessage(@PathVariable Long messageId, @Valid @RequestBody MessageRequest newMessage) {
+        MessageResponse updatedMessage = messageService.editMessage(messageId, newMessage);
+        return new ResponseEntity<>(updatedMessage, HttpStatus.OK);
+    }
 }

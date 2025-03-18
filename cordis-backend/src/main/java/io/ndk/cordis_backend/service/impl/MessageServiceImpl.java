@@ -1,9 +1,7 @@
 package io.ndk.cordis_backend.service.impl;
 
-import io.ndk.cordis_backend.Mappers.Mapper;
 import io.ndk.cordis_backend.Mappers.impl.DirectMessageMapper;
 import io.ndk.cordis_backend.Mappers.impl.ServerMessageMapper;
-import io.ndk.cordis_backend.dto.UserDto;
 import io.ndk.cordis_backend.dto.request.MessageRequest;
 import io.ndk.cordis_backend.dto.response.MessageResponse;
 import io.ndk.cordis_backend.entity.DirectMessageEntity;
@@ -16,10 +14,7 @@ import io.ndk.cordis_backend.repository.ServerMessageRepository;
 import io.ndk.cordis_backend.repository.UserRepository;
 import io.ndk.cordis_backend.service.MessageService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.Server;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserRepository userRepository;
     private final DirectMessageMapper mapper;
     private final ServerMessageMapper serverMessagemapper;
+    private final DirectMessageRepository directMessageRepository;
 
     @Override
     public MessageResponse saveMessage(MessageRequest messageDto) {
@@ -73,12 +69,39 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageResponse> getMessages(Long chatId) {
-        return messageRepository.findByChatId(chatId).stream().map(mapper::mapTo).collect(Collectors.toList());
+        Sort sort = Sort.by(Sort.Direction.ASC, "timestamp");
+        return messageRepository.findByChatId(chatId, sort).stream().map(mapper::mapTo).collect(Collectors.toList());
     }
 
     @Override
     public List<MessageResponse> getGroupMessages(Long chatId) {
-        return serverMessageRepository.findByChatId(chatId).stream().map(serverMessagemapper::mapTo).collect(Collectors.toList());
+        Sort sort = Sort.by(Sort.Direction.ASC, "timestamp");
+        return serverMessageRepository.findByChatId(chatId, sort).stream().map(serverMessagemapper::mapTo).collect(Collectors.toList());
+    }
+
+    @Override
+    public MessageResponse editMessage(Long messageId, MessageRequest newMessage) {
+        if(newMessage.getGroup()) {
+            ServerMessageEntity message = serverMessageRepository.findById(messageId).orElseThrow(
+                    () -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE)
+            );
+            message.setContent(newMessage.getContent());
+//            message.setTimestamp(LocalDateTime.now());
+            ServerMessageEntity save = serverMessageRepository.save(message);
+            MessageResponse messageResponse = serverMessagemapper.mapTo(save);
+            messagingTemplate.convertAndSend("/group/" + message.getChatId(), messageResponse);
+            return messageResponse;
+        }else{
+            DirectMessageEntity message = directMessageRepository.findById(messageId).orElseThrow(
+                    () -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE)
+            );
+            message.setContent(newMessage.getContent());
+//            message.setTimestamp(LocalDateTime.now());
+            DirectMessageEntity saved = directMessageRepository.save(message);
+            MessageResponse messageResponse = mapper.mapTo(saved);
+            messagingTemplate.convertAndSend("/user/" + message.getChatId(), messageResponse);
+            return messageResponse;
+        }
     }
 
     private UserEntity getUser(Long id) {

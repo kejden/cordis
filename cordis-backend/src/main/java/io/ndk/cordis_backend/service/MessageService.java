@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface MessageService {
     MessageResponse saveMessage(MessageRequest messageDto);
-//    Page<MessageResponse> getMessages(Long chatId, int page, int size);
     List<MessageResponse> getMessages(Long chatId);
     List<MessageResponse> getGroupMessages(Long chatId);
+    MessageResponse editMessage(Long messageId, MessageRequest newMessage);
 }
