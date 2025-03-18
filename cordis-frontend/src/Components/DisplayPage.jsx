@@ -9,14 +9,14 @@ import { over } from "stompjs";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { BASE_API_URL } from "../config/api.js";
-import { createMessage, getAllMessages } from "../Redux/Message/Action.js";
+import { createMessage, getAllMessages, editMessage } from "../Redux/Message/Action.js";
 import { updateLatestChats } from "../Redux/Chat/Action.js";
-import {getAllServers} from "../Redux/Server/Action.js";
+import { getAllServers } from "../Redux/Server/Action.js";
 import ServerSideBar from "./Server/ServerSideBar.jsx";
 import ServerUsers from "./Server/ServerUsers.jsx";
 
 const DisplayPage = () => {
-    const { auth, chat, message, server} = useSelector((store) => store);
+    const { auth, chat, message, server } = useSelector((store) => store);
     const dispatch = useDispatch();
 
     const [chatOpen, setChatOpen] = useState(false);
@@ -31,7 +31,6 @@ const DisplayPage = () => {
     const [serverName, setServerName] = useState("");
     const [localLatestChats, setLocalLatestChats] = useState([]);
     const [userRole, setUserRole] = useState(null);
-
 
     useEffect(() => {
         setLocalLatestChats(chat.latestChats || []);
@@ -56,7 +55,7 @@ const DisplayPage = () => {
     }, [message?.messages]);
 
     useEffect(() => {
-        if (chatWindow  && message?.newMessage) {
+        if (chatWindow && message?.newMessage) {
             dispatch(getAllMessages({ chatId: chatWindow, isServerChannel: isGroup }));
         }
     }, [chatWindow, message.newMessage]);
@@ -78,7 +77,7 @@ const DisplayPage = () => {
         const temp = over(sock);
         setStompClient(temp);
 
-        temp.connect([], onConnect, onError);
+        temp.connect({}, onConnect, onError);
     };
 
     const onError = (error) => {
@@ -91,7 +90,7 @@ const DisplayPage = () => {
         if (stompClient && chatWindow) {
             const subscription = isGroup
                 ? stompClient.subscribe(`/group/${chatWindow}`, onMessageReceive)
-                : stompClient.subscribe(`/user/${auth.signin.id}/messages`, onMessageReceive); // /user/${chatWindow}
+                : stompClient.subscribe(`/user/${auth.signin.id}/messages`, onMessageReceive);
 
             return () => {
                 subscription.unsubscribe();
@@ -111,7 +110,6 @@ const DisplayPage = () => {
                 return [...prevMessages, receivedMessage];
             });
 
-
             const chatId = receivedMessage.chatId || chatWindow;
 
             if (chatId) {
@@ -126,10 +124,28 @@ const DisplayPage = () => {
 
     const handleCreateNewMessage = (content) => {
         dispatch(
-            createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id, group: isGroup }),
+            createMessage({ chatId: chatWindow, content: content, userId: auth.signin.id, group: isGroup })
         );
         setContent("");
         updateChatOrder(chatWindow);
+    };
+
+    const handleEditMessage = (messageId, newContent) => {
+        dispatch(
+            editMessage(messageId, {
+                chatId: chatWindow,
+                userId: auth.signin.id,
+                content: newContent,
+                group: isGroup
+            })
+        );
+        if (stompClient) {
+            stompClient.send(
+                `/app/edit-message`,
+                {},
+                JSON.stringify({ messageId, newContent })
+            );
+        }
     };
 
     const fetchLatestChats = async () => {
@@ -186,9 +202,8 @@ const DisplayPage = () => {
         setIsGroup(true);
         setOpenedServer(serverId);
         setChatOpen(false);
-        setServerName(selectedServer.name)
+        setServerName(selectedServer.name);
         fetchUserRole(serverId);
-
     };
 
     const closeServer = () => {
@@ -196,8 +211,8 @@ const DisplayPage = () => {
         setIsGroup(false);
         setOpenedServer(null);
         setChatOpen(false);
-        setServerName("")
-        setUserRole(null)
+        setServerName("");
+        setUserRole(null);
     };
 
     const handleChannelClick = (channel) => {
@@ -209,11 +224,13 @@ const DisplayPage = () => {
         <>
             <ServerBar servers={server.servers} openServer={openServer} closeServer={closeServer} />
             <div className="flex h-screen bg-gray-800">
-                {!serverOpen ? (<FriendSideBar
-                    latestChats={localLatestChats}
-                    setChatOpen={setChatOpen}
-                    setChatWindow={setChatWindow}
-                />) : (
+                {!serverOpen ? (
+                    <FriendSideBar
+                        latestChats={localLatestChats}
+                        setChatOpen={setChatOpen}
+                        setChatWindow={setChatWindow}
+                    />
+                ) : (
                     <ServerSideBar
                         server={openedServer}
                         onChannelClick={handleChannelClick}
@@ -222,27 +239,19 @@ const DisplayPage = () => {
                     />
                 )}
                 {!serverOpen && !chatOpen && (
-                    <FriendManager
-                        setChatOpen={setChatOpen}
-                        setChatWindow={setChatWindow}
-                    />
+                    <FriendManager setChatOpen={setChatOpen} setChatWindow={setChatWindow} />
                 )}
                 {chatOpen && (
                     <ChatWindow
                         handleCreateNewMessage={(content) => handleCreateNewMessage(content)}
+                        handleEditMessage={(messageId, newContent) => handleEditMessage(messageId, newContent)}
                         messages={messages}
                         onClose={() => setChatOpen(false)}
                     />
                 )}
                 <div className="ml-auto">
-                    {serverOpen && (
-                        <ServerUsers
-                            serverId={openedServer}
-                            role={userRole}
-                        />
-                    )}
+                    {serverOpen && <ServerUsers serverId={openedServer} role={userRole} />}
                 </div>
-
             </div>
         </>
     );

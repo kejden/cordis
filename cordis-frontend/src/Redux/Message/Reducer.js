@@ -10,6 +10,13 @@ export const messageReducer = (store = initialValue, { type, payload }) => {
         return { ...store, newMessage: payload };
     } else if (type === GET_ALL_MESSAGE) {
         return { ...store, messages: payload };
+    } else if (type === "EDIT_MESSAGE") {
+        if(Array.isArray(store.messages)){
+            const updatedMessages = store.messages.map((m) =>
+                m.id === payload.id ? { ...m, ...payload } : m
+              );
+            return { ...store, messages: updatedMessages };
+        }
     }
     return store;
 };
