@@ -12,4 +12,5 @@ public interface MessageService {
     List<MessageResponse> getMessages(Long chatId);
     List<MessageResponse> getGroupMessages(Long chatId);
     MessageResponse editMessage(Long messageId, MessageRequest newMessage);
+    void deleteMessage(Long id, boolean isGroup);
 }

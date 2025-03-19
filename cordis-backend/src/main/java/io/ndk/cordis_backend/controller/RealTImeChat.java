@@ -7,6 +7,9 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 public class RealTImeChat {
 
@@ -28,5 +31,22 @@ public class RealTImeChat {
     public DirectMessageEntity editMessage(@Payload DirectMessageEntity message) {
         template.convertAndSend("/group" + message.getChatId(), message);
         return message;
+    }
+
+    @MessageMapping("/delete-message")
+    @SendTo("/group/public")
+    public Map<String, Object> deleteMessage(@Payload Map<String, Object> payload) {
+        Long messageId = Long.valueOf(payload.get("messageId").toString());
+        Long chatId = Long.valueOf(payload.get("chatId").toString());
+        boolean isGroup = Boolean.parseBoolean(payload.get("isGroup").toString());
+
+        String topic = isGroup ? "/group/" + chatId : "/user/" + chatId;
+        Map<String, Object> response = new HashMap<>();
+        response.put("action", "delete");
+        response.put("messageId", messageId);
+
+        template.convertAndSend(topic, response);
+
+        return response;
     }
 }

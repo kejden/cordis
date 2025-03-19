@@ -45,3 +45,15 @@ export const editMessage = (messageId, data) => async (dispatch) => {
     }
 
 };
+
+export const deleteMessage = (messageId, isGroup) => async (dispatch) => {
+    try {
+        const response = await axios.delete(`${BASE_API_URL}/api/messages/delete/${messageId}`, {
+            params: { isGroup },
+            withCredentials: true,
+        });
+        dispatch({ type: "DELETE_MESSAGE", payload: messageId });
+    } catch (error) {
+        console.error("Error deleting message:", error);
+    }
+};

@@ -41,4 +41,10 @@ public class MessageController {
         MessageResponse updatedMessage = messageService.editMessage(messageId, newMessage);
         return new ResponseEntity<>(updatedMessage, HttpStatus.OK);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Long id, @RequestParam boolean isGroup) {
+        messageService.deleteMessage(id, isGroup);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

@@ -17,6 +17,11 @@ export const messageReducer = (store = initialValue, { type, payload }) => {
               );
             return { ...store, messages: updatedMessages };
         }
+    } else if (type === "DELETE_MESSAGE"){
+        return {
+            ...store,
+            messages: store.messages.filter((msg) => msg.id !== payload),
+        };
     }
     return store;
 };

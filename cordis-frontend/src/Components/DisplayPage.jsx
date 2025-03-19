@@ -9,7 +9,7 @@ import { over } from "stompjs";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { BASE_API_URL } from "../config/api.js";
-import { createMessage, getAllMessages, editMessage } from "../Redux/Message/Action.js";
+import { createMessage, getAllMessages, editMessage, deleteMessage } from "../Redux/Message/Action.js";
 import { updateLatestChats } from "../Redux/Chat/Action.js";
 import { getAllServers } from "../Redux/Server/Action.js";
 import ServerSideBar from "./Server/ServerSideBar.jsx";
@@ -100,31 +100,39 @@ const DisplayPage = () => {
 
     const onMessageReceive = (payload) => {
         try {
-            const receivedMessage = JSON.parse(payload.body);
+            const data = JSON.parse(payload.body);
 
-            setMessages((prevMessages) => {
-                if (!Array.isArray(prevMessages)) {
-                    console.error("prevMessages is not an array:", prevMessages);
-                    return [receivedMessage];
-                }
-
-                const messageIndex = prevMessages.findIndex((msg) => msg.id === receivedMessage.id);
-
-                if (messageIndex !== -1) {
-                    const updatedMessages = [...prevMessages];
-                    updatedMessages[messageIndex] = receivedMessage;
-                    return updatedMessages;
-                } else {
-                    return [...prevMessages, receivedMessage];
-                }
-            });
-
-            const chatId = receivedMessage.chatId || chatWindow;
-
-            if (chatId) {
-                updateChatOrder(chatId);
+            if (data.action === "delete") {
+                setMessages((prevMessages) =>
+                    prevMessages.filter((msg) => msg.id !== data.messageId)
+                );
             } else {
-                toast.error("Chat ID not found in received message:", receivedMessage);
+                const receivedMessage = data;
+
+                setMessages((prevMessages) => {
+                    if (!Array.isArray(prevMessages)) {
+                        console.error("prevMessages is not an array:", prevMessages);
+                        return [receivedMessage];
+                    }
+
+                    const messageIndex = prevMessages.findIndex((msg) => msg.id === receivedMessage.id);
+
+                    if (messageIndex !== -1) {
+                        const updatedMessages = [...prevMessages];
+                        updatedMessages[messageIndex] = receivedMessage;
+                        return updatedMessages;
+                    } else {
+                        return [...prevMessages, receivedMessage];
+                    }
+                });
+
+                const chatId = receivedMessage.chatId || chatWindow;
+
+                if (chatId) {
+                    updateChatOrder(chatId);
+                } else {
+                    toast.error("Chat ID not found in received message:", receivedMessage);
+                }
             }
         } catch (error) {
             console.error("Error parsing message payload:", error);
@@ -155,6 +163,10 @@ const DisplayPage = () => {
                 JSON.stringify({ messageId, newContent })
             );
         }
+    };
+
+    const handleDeleteMessage = (messageId) => {
+        dispatch(deleteMessage(messageId, isGroup));
     };
 
     const fetchLatestChats = async () => {
@@ -254,6 +266,7 @@ const DisplayPage = () => {
                     <ChatWindow
                         handleCreateNewMessage={(content) => handleCreateNewMessage(content)}
                         handleEditMessage={(messageId, newContent) => handleEditMessage(messageId, newContent)}
+                        handleDeleteMessage={(messageId) => handleDeleteMessage(messageId)}
                         messages={messages}
                         onClose={() => setChatOpen(false)}
                     />

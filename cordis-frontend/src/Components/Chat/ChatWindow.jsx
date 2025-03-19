@@ -3,7 +3,7 @@ import MessageInput from "./MessageInput.jsx";
 import MessageList from "./MessageList.jsx";
 import { IoClose } from "react-icons/io5";
 
-const ChatWindow = ({ handleCreateNewMessage, handleEditMessage, messages, onClose }) => {
+const ChatWindow = ({ handleCreateNewMessage, handleEditMessage, handleDeleteMessage, messages, onClose }) => {
     return (
         <div className="flex flex-col flex-1 h-full bg-gray-800 text-white">
             <div className="p-4 bg-gray-900 border-b border-gray-700 flex items-center justify-between">
@@ -16,7 +16,7 @@ const ChatWindow = ({ handleCreateNewMessage, handleEditMessage, messages, onClo
                 </div>
             </div>
 
-            <MessageList messages={messages} handleEditMessage={handleEditMessage} />
+            <MessageList messages={messages} handleEditMessage={handleEditMessage} handleDeleteMessage={handleDeleteMessage}/>
             <MessageInput handleCreateNewMessage={handleCreateNewMessage} />
         </div>
     );

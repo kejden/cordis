@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +33,6 @@ public class MessageServiceImpl implements MessageService {
     private final UserRepository userRepository;
     private final DirectMessageMapper mapper;
     private final ServerMessageMapper serverMessagemapper;
-    private final DirectMessageRepository directMessageRepository;
 
     @Override
     public MessageResponse saveMessage(MessageRequest messageDto) {
@@ -92,15 +92,30 @@ public class MessageServiceImpl implements MessageService {
             messagingTemplate.convertAndSend("/group/" + message.getChatId(), messageResponse);
             return messageResponse;
         }else{
-            DirectMessageEntity message = directMessageRepository.findById(messageId).orElseThrow(
+            DirectMessageEntity message = messageRepository.findById(messageId).orElseThrow(
                     () -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE)
             );
             message.setContent(newMessage.getContent());
 //            message.setTimestamp(LocalDateTime.now());
-            DirectMessageEntity saved = directMessageRepository.save(message);
+            DirectMessageEntity saved = messageRepository.save(message);
             MessageResponse messageResponse = mapper.mapTo(saved);
             messagingTemplate.convertAndSend("/user/" + message.getChatId(), messageResponse);
             return messageResponse;
+        }
+    }
+
+    @Override
+    public void deleteMessage(Long id, boolean isGroup) {
+        if (isGroup) {
+            ServerMessageEntity message = serverMessageRepository.findById(id)
+                    .orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE));
+            serverMessageRepository.delete(message);
+            messagingTemplate.convertAndSend("/group/" + message.getChatId(), Map.of("action", "delete", "messageId", id));
+        } else {
+            DirectMessageEntity message = messageRepository.findById(id)
+                    .orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE));
+            messageRepository.delete(message);
+            messagingTemplate.convertAndSend("/user/" + message.getChatId(), Map.of("action", "delete", "messageId", id));
         }
     }
 

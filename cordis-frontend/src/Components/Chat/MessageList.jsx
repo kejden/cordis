@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Message from "./Message.jsx";
 
-const MessageList = ({ messages, handleEditMessage }) => {
+const MessageList = ({ messages, handleEditMessage, handleDeleteMessage }) => {
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -26,7 +26,7 @@ const MessageList = ({ messages, handleEditMessage }) => {
             `}</style>
             {messages.length > 0 ? (
                 messages.map((message, index) => (
-                    <Message key={index} message={message} handleEditMessage={handleEditMessage} />
+                    <Message key={index} message={message} handleEditMessage={handleEditMessage} handleDeleteMessage={handleDeleteMessage}/>
                 ))
             ) : (
                 <p className="text-center text-gray-400">No messages yet</p>

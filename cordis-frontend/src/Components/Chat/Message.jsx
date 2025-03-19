@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import moment from "moment/moment.js";
 import { useSelector } from "react-redux";
+import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
 
-const Message = ({ message, handleEditMessage }) => {
+const Message = ({ message, handleEditMessage, handleDeleteMessage }) => {
     const { auth } = useSelector((store) => store);
     const [isEditing, setIsEditing] = useState(false);
     const [newContent, setNewContent] = useState(message.content);
@@ -46,23 +47,46 @@ const Message = ({ message, handleEditMessage }) => {
                         onChange={(e) => setNewContent(e.target.value)}
                         className="w-full p-2 rounded bg-gray-600 text-white"
                     />
-                    <button onClick={handleSaveEdit} className="mt-2 px-4 py-2 bg-green-500 rounded">
-                        Save
-                    </button>
+                    <div className="flex gap-2 mt-2">
+                        <button
+                            onClick={handleSaveEdit}
+                            className="p-2 bg-green-500 rounded hover:bg-green-600"
+                            title="Save"
+                        >
+                            <FaSave className="text-white" />
+                        </button>
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            className="p-2 bg-red-500 rounded hover:bg-red-600"
+                            title="Cancel"
+                        >
+                            <FaTrash className="text-white" />
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <p>{message.content}</p>
             )}
             {message.sender.userName === auth.signin.userName && !isEditing && (
-                <button onClick={() => setIsEditing(true)} className="mt-2 px-4 py-2 bg-yellow-500 rounded">
-                    Edit
-                </button>
+                <div className="flex gap-2 mt-2">
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="p-2 bg-yellow-500 rounded hover:bg-yellow-600"
+                        title="Edit"
+                    >
+                        <FaEdit className="text-white" />
+                    </button>
+                    <button
+                        onClick={() => handleDeleteMessage(message.id)}
+                        className="p-2 bg-red-500 rounded hover:bg-red-600"
+                        title="Delete"
+                    >
+                        <FaTrash className="text-white" />
+                    </button>
+                </div>
             )}
         </div>
     );
 };
 
 export default Message;
-
-
-
