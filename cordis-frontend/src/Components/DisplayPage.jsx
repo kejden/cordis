@@ -107,7 +107,16 @@ const DisplayPage = () => {
                     console.error("prevMessages is not an array:", prevMessages);
                     return [receivedMessage];
                 }
-                return [...prevMessages, receivedMessage];
+
+                const messageIndex = prevMessages.findIndex((msg) => msg.id === receivedMessage.id);
+
+                if (messageIndex !== -1) {
+                    const updatedMessages = [...prevMessages];
+                    updatedMessages[messageIndex] = receivedMessage;
+                    return updatedMessages;
+                } else {
+                    return [...prevMessages, receivedMessage];
+                }
             });
 
             const chatId = receivedMessage.chatId || chatWindow;
