@@ -228,7 +228,7 @@ const DisplayPage = () => {
                         handleCreateNewMessage={(content) => handleCreateNewMessage(content)}
                         handleEditMessage={(messageId, newContent) => handleEditMessage(messageId, newContent)}
                         handleDeleteMessage={(messageId) => handleDeleteMessage(messageId)}
-                        messages={message.messages}  // Use Redux store’s messages here
+                        messages={message.messages}
                         onClose={() => setChatOpen(false)}
                     />
                 )}

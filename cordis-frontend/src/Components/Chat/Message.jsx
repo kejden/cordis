@@ -15,13 +15,14 @@ const Message = ({ message, handleEditMessage, handleDeleteMessage }) => {
         setIsEditing(false);
     };
 
+    const isOwnMessage = message.sender.userName === auth.signin.userName;
+
     return (
         <div
-            className={`p-3 rounded-lg ${
-                message.sender.userName === auth.signin.userName
-                    ? "bg-blue-500 self-end"
-                    : "bg-gray-700 self-start"
-            }`}
+            className={`
+                group relative p-3 rounded-lg max-w-lg
+                ${isOwnMessage ? "bg-blue-500 self-end" : "bg-gray-700 self-start"}
+            `}
         >
             <div className="flex items-center mb-2">
                 <img
@@ -39,8 +40,9 @@ const Message = ({ message, handleEditMessage, handleDeleteMessage }) => {
                     </span>
                 </div>
             </div>
+
             {isEditing ? (
-                <div>
+                <>
                     <input
                         type="text"
                         value={newContent}
@@ -63,12 +65,19 @@ const Message = ({ message, handleEditMessage, handleDeleteMessage }) => {
                             <FaTrash className="text-white" />
                         </button>
                     </div>
-                </div>
+                </>
             ) : (
                 <p>{message.content}</p>
             )}
-            {message.sender.userName === auth.signin.userName && !isEditing && (
-                <div className="flex gap-2 mt-2">
+
+            {isOwnMessage && !isEditing && (
+                <div
+                    className="
+                        absolute top-2 right-2 flex gap-2
+                        opacity-0 group-hover:opacity-100
+                        transition-opacity
+                    "
+                >
                     <button
                         onClick={() => setIsEditing(true)}
                         className="p-2 bg-yellow-500 rounded hover:bg-yellow-600"
