@@ -1,5 +1,5 @@
 import {BASE_API_URL} from "../../config/api.js";
-import {CREATE_NEW_MESSAGE, EDIT_MESSAGE, GET_ALL_MESSAGE} from "./ActionType.js";
+import {CREATE_NEW_MESSAGE, DELETE_MESSAGE, EDIT_MESSAGE, GET_ALL_MESSAGE} from "./ActionType.js";
 import axios from "axios";
 
 export const createMessage = (data) => async (dispatch) => {
@@ -52,7 +52,7 @@ export const deleteMessage = (messageId, isGroup) => async (dispatch) => {
             params: { isGroup },
             withCredentials: true,
         });
-        dispatch({ type: "DELETE_MESSAGE", payload: messageId });
+        dispatch({ type: DELETE_MESSAGE, payload: messageId });
     } catch (error) {
         console.error("Error deleting message:", error);
     }

@@ -14,6 +14,7 @@ import { updateLatestChats } from "../Redux/Chat/Action.js";
 import { getAllServers } from "../Redux/Server/Action.js";
 import ServerSideBar from "./Server/ServerSideBar.jsx";
 import ServerUsers from "./Server/ServerUsers.jsx";
+import {DELETE_MESSAGE, EDIT_MESSAGE, CREATE_NEW_MESSAGE} from "../Redux/Message/ActionType.js";
 
 const DisplayPage = () => {
     const { auth, chat, message, server } = useSelector((store) => store);
@@ -26,7 +27,6 @@ const DisplayPage = () => {
     const [stompClient, setStompClient] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [isGroup, setIsGroup] = useState(false);
-    const [messages, setMessages] = useState([]);
     const [content, setContent] = useState("");
     const [serverName, setServerName] = useState("");
     const [localLatestChats, setLocalLatestChats] = useState([]);
@@ -49,12 +49,6 @@ const DisplayPage = () => {
     }, []);
 
     useEffect(() => {
-        if (message?.messages) {
-            setMessages(Array.isArray(message.messages) ? message.messages : []);
-        }
-    }, [message?.messages]);
-
-    useEffect(() => {
         if (chatWindow && message?.newMessage) {
             dispatch(getAllMessages({ chatId: chatWindow, isServerChannel: isGroup }));
         }
@@ -62,15 +56,14 @@ const DisplayPage = () => {
 
     useEffect(() => {
         if (isConnected && stompClient && chatWindow) {
-            const subscription = isGroup
-                ? stompClient.subscribe(`/group/${chatWindow}`, onMessageReceive)
-                : stompClient.subscribe(`/user/${chatWindow}`, onMessageReceive);
+            const topic = isGroup ? `/group/${chatWindow}` : `/user/${chatWindow}`;
+            const subscription = stompClient.subscribe(topic, onMessageReceive);
 
             return () => {
                 subscription.unsubscribe();
             };
         }
-    }, [isConnected, stompClient, chatWindow]);
+    }, [isConnected, stompClient, chatWindow, isGroup]);
 
     const connect = () => {
         const sock = new SockJs("http://localhost:8080/ws");
@@ -103,36 +96,11 @@ const DisplayPage = () => {
             const data = JSON.parse(payload.body);
 
             if (data.action === "delete") {
-                setMessages((prevMessages) =>
-                    prevMessages.filter((msg) => msg.id !== data.messageId)
-                );
+                dispatch({ type: DELETE_MESSAGE, payload: data.messageId });
+            } else if (data.action === "edit") {
+                dispatch({ type: EDIT_MESSAGE, payload: data });
             } else {
-                const receivedMessage = data;
-
-                setMessages((prevMessages) => {
-                    if (!Array.isArray(prevMessages)) {
-                        console.error("prevMessages is not an array:", prevMessages);
-                        return [receivedMessage];
-                    }
-
-                    const messageIndex = prevMessages.findIndex((msg) => msg.id === receivedMessage.id);
-
-                    if (messageIndex !== -1) {
-                        const updatedMessages = [...prevMessages];
-                        updatedMessages[messageIndex] = receivedMessage;
-                        return updatedMessages;
-                    } else {
-                        return [...prevMessages, receivedMessage];
-                    }
-                });
-
-                const chatId = receivedMessage.chatId || chatWindow;
-
-                if (chatId) {
-                    updateChatOrder(chatId);
-                } else {
-                    toast.error("Chat ID not found in received message:", receivedMessage);
-                }
+                dispatch({ type: CREATE_NEW_MESSAGE, payload: data });
             }
         } catch (error) {
             console.error("Error parsing message payload:", error);
@@ -156,13 +124,6 @@ const DisplayPage = () => {
                 group: isGroup
             })
         );
-        if (stompClient) {
-            stompClient.send(
-                `/app/edit-message`,
-                {},
-                JSON.stringify({ messageId, newContent })
-            );
-        }
     };
 
     const handleDeleteMessage = (messageId) => {
@@ -267,7 +228,7 @@ const DisplayPage = () => {
                         handleCreateNewMessage={(content) => handleCreateNewMessage(content)}
                         handleEditMessage={(messageId, newContent) => handleEditMessage(messageId, newContent)}
                         handleDeleteMessage={(messageId) => handleDeleteMessage(messageId)}
-                        messages={messages}
+                        messages={message.messages}  // Use Redux store’s messages here
                         onClose={() => setChatOpen(false)}
                     />
                 )}

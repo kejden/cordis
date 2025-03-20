@@ -6,9 +6,13 @@ const MessageList = ({ messages, handleEditMessage, handleDeleteMessage }) => {
 
     useEffect(() => {
         if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+            setTimeout(() => {
+                containerRef.current.scrollTop = containerRef.current.scrollHeight;
+            }, 100); // Adjust the delay as needed
         }
     }, [messages]);
+
+    console.log("Messages in MessageList:", messages);
 
     return (
         <div
@@ -25,8 +29,13 @@ const MessageList = ({ messages, handleEditMessage, handleDeleteMessage }) => {
                 }
             `}</style>
             {messages.length > 0 ? (
-                messages.map((message, index) => (
-                    <Message key={index} message={message} handleEditMessage={handleEditMessage} handleDeleteMessage={handleDeleteMessage}/>
+                messages.map((message) => (
+                    <Message
+                        key={message.id} // Use message.id as the key
+                        message={message}
+                        handleEditMessage={handleEditMessage}
+                        handleDeleteMessage={handleDeleteMessage}
+                    />
                 ))
             ) : (
                 <p className="text-center text-gray-400">No messages yet</p>
