@@ -8,17 +8,16 @@ import axios from "axios";
 import { BASE_API_URL } from "../../config/api.js";
 import toast from "react-hot-toast";
 import { UPDATE_PROFILE_IMAGE, UPDATE_USER } from "../../Redux/Auth/ActionType.js";
-import {getAllServers} from "../../Redux/Server/Action.js";
 
 const UserCard = () => {
     const { auth } = useSelector((store) => store);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [nickname, setNickname] = useState(auth.reqUser.userName);
     const [profileImage, setProfileImage] = useState(null);
     const [activeTab, setActiveTab] = useState("profile");
-    const [inviteCode, setInviteCode] = useState("");
 
     function userProfileEdit() {
         setIsDialogOpen(true);
@@ -26,8 +25,6 @@ const UserCard = () => {
 
     function closeDialog() {
         setIsDialogOpen(false);
-        setActiveTab("profile");
-        setInviteCode("");
     }
 
     function handleLogout() {
@@ -38,13 +35,14 @@ const UserCard = () => {
 
     async function handleNicknameUpdate() {
         try {
-            const response = await axios.post(`${BASE_API_URL}/profile/edit`, {
-                username: nickname,
-            }, { withCredentials: true });
+            const response = await axios.post(
+                `${BASE_API_URL}/profile/edit`,
+                { username: nickname },
+                { withCredentials: true }
+            );
             const data = await response.data;
 
             dispatch({ type: UPDATE_USER, payload: data });
-
             toast.success("Nickname updated successfully");
             setIsDialogOpen(false);
         } catch (error) {
@@ -54,6 +52,7 @@ const UserCard = () => {
     }
 
     async function handleProfileImageUpdate() {
+        if (!profileImage) return;
         const formData = new FormData();
         formData.append("image", profileImage);
 
@@ -64,37 +63,13 @@ const UserCard = () => {
                 },
                 withCredentials: true,
             });
-            const data = await response.data;
-            const strippedData = data.replace(/^.*\/uploads\//, '');
-
+            const strippedData = response.data.replace(/^.*\/uploads\//, '');
             dispatch({ type: UPDATE_PROFILE_IMAGE, payload: { profileImage: strippedData } });
-
             toast.success("Profile image updated successfully");
             setIsDialogOpen(false);
         } catch (error) {
             toast.error("Error updating profile image");
             console.error("Failed to update profile image:", error);
-        }
-    }
-
-    async function handleJoinServer() {
-        try {
-            const response = await axios.post(
-                `${BASE_API_URL}/api/server/join`,
-                inviteCode,
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "text/plain",
-                    },
-                }
-            );
-            toast.success("Successfully joined the server");
-            dispatch(getAllServers());
-            closeDialog();
-        } catch (error) {
-            toast.error("Error joining server");
-            console.error("Failed to join server:", error);
         }
     }
 
@@ -132,16 +107,7 @@ const UserCard = () => {
                             >
                                 Profile
                             </button>
-                            <button
-                                onClick={() => setActiveTab("joinServer")}
-                                className={`flex-1 py-2 text-center ${
-                                    activeTab === "joinServer"
-                                        ? "border-b-2 border-blue-500"
-                                        : "text-gray-400 hover:text-white"
-                                }`}
-                            >
-                                Join Server
-                            </button>
+                            {/* Removed Join Server tab */}
                         </div>
 
                         {activeTab === "profile" && (
@@ -186,25 +152,7 @@ const UserCard = () => {
                             </>
                         )}
 
-                        {activeTab === "joinServer" && (
-                            <>
-                                <label className="block mb-2">
-                                    <span className="text-sm font-medium">Invite Code</span>
-                                    <input
-                                        type="text"
-                                        value={inviteCode}
-                                        onChange={(e) => setInviteCode(e.target.value)}
-                                        className="w-full mt-1 p-2 bg-gray-700 text-white rounded"
-                                    />
-                                </label>
-                                <button
-                                    onClick={handleJoinServer}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded mb-4"
-                                >
-                                    Join Server
-                                </button>
-                            </>
-                        )}
+                        {/* Removed the entire “joinServer” section */}
 
                         <button
                             onClick={closeDialog}

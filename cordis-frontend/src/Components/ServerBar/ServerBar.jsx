@@ -1,39 +1,53 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
 import SideBarIcon from "./SideBarIcon.jsx";
-import {CgDice1, CgDice2, CgDice3, CgDice4, CgDice5} from "react-icons/cg";
-import {FaPlus} from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { IoHomeSharp } from "react-icons/io5";
 import axios from "axios";
-import {BASE_API_URL} from "../../config/api.js";
-import { createNewServer } from "../../Redux/Server/Action.js";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
-import {useDispatch} from "react-redux";
+import { BASE_API_URL } from "../../config/api.js";
+import { createNewServer, getAllServers } from "../../Redux/Server/Action.js";
 import ServerBarIcon from "./ServerBarIcon.jsx";
-import {IoHomeSharp} from "react-icons/io5";
 
-const ServerBar = ({servers, openServer, closeServer}) => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [serverName, setServerName] = useState("");
-    const [serverImage, setServerImage] = useState("");
-    const [selectedFile, setSelectedFile] = useState(null);
+const ServerBar = ({ servers, openServer, closeServer }) => {
     const dispatch = useDispatch();
 
-    const openDialog = () => setIsDialogOpen(true);
+    // Toggle dialog
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    // Tab state
+    const [activeTab, setActiveTab] = useState("create");
+
+    // For creating a server
+    const [serverName, setServerName] = useState("");
+    const [serverImage, setServerImage] = useState(null);
+    const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+
+    // For joining a server
+    const [inviteCode, setInviteCode] = useState("");
+
+    const openDialog = () => {
+        setIsDialogOpen(true);
+    };
+
     const closeDialog = () => {
         setIsDialogOpen(false);
+        setActiveTab("create");
         setServerName("");
-        setServerImage("");
-        setSelectedFile(null);
+        setServerImage(null);
+        setUploadedImageUrl("");
+        setInviteCode("");
     };
 
     const handleOpenServer = (serverId) => {
-        console.log("Server ID clicked:", serverId);
         openServer(serverId);
     };
 
+    // ---------------- CREATE SERVER ----------------
     const handleFileUpload = async () => {
-        if (!selectedFile) return;
+        if (!serverImage) return;
         const formData = new FormData();
-        formData.append("file", selectedFile);
+        formData.append("file", serverImage);
 
         try {
             const response = await axios.post(`${BASE_API_URL}/api/file/upload`, formData, {
@@ -42,37 +56,57 @@ const ServerBar = ({servers, openServer, closeServer}) => {
                 },
                 withCredentials: true,
             });
-            setServerImage(response.data);
+            setUploadedImageUrl(response.data);
+            toast.success("Image uploaded successfully!");
         } catch (error) {
             toast.error("Error uploading file");
-            console.error("Error uploading file: " + error)
-
+            console.error("Error uploading file: ", error);
         }
     };
 
     const handleCreateServer = async () => {
-        if (!serverName || !serverImage) {
-            toast.error("Server name and image are required.");
+        if (!serverName || !uploadedImageUrl) {
+            toast.error("Please provide both a server name and an image.");
             return;
         }
-
         try {
-            await dispatch(createNewServer({ name: serverName, image: serverImage }));
+            await dispatch(createNewServer({ name: serverName, image: uploadedImageUrl }));
             toast.success("Server created successfully.");
+            dispatch(getAllServers());
             closeDialog();
         } catch (error) {
+            toast.error("Error creating server");
             console.error("Error in handleCreateServer: ", error);
+        }
+    };
+
+    // ---------------- JOIN SERVER ----------------
+    const handleJoinServer = async () => {
+        if (!inviteCode) return;
+        try {
+            await axios.post(
+                `${BASE_API_URL}/api/server/join`,
+                inviteCode,
+                {
+                    withCredentials: true,
+                    headers: { "Content-Type": "text/plain" },
+                }
+            );
+            toast.success("Successfully joined the server");
+            dispatch(getAllServers());
+            closeDialog();
+        } catch (error) {
+            toast.error("Error joining server");
+            console.error("Failed to join server:", error);
         }
     };
 
     return (
         <>
-            <div
-                className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-950 text-white shadow-lg justify-between"
-            >
+            <div className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-gray-950 text-white shadow-lg justify-between">
                 <div>
-                    <SideBarIcon icon={<IoHomeSharp/>} onClick={closeServer}/>
-                    <div className="border-b border-gray-600 my-2"/>
+                    <SideBarIcon icon={<IoHomeSharp />} onClick={closeServer} />
+                    <div className="border-b border-gray-600 my-2" />
                     {servers && servers.length > 0 ? (
                         servers.map((server) => (
                             <ServerBarIcon
@@ -87,52 +121,105 @@ const ServerBar = ({servers, openServer, closeServer}) => {
                     )}
                 </div>
                 <div>
-                    <SideBarIcon icon={<FaPlus/>} onClick={openDialog}/>
+                    <SideBarIcon icon={<FaPlus />} onClick={openDialog} />
                 </div>
             </div>
 
+            {/* Dialog with tabs */}
             {isDialogOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-                        <h2 className="text-xl font-bold mb-4">Create Server</h2>
-                        <label className="block mb-2">
-                            <span className="text-gray-700">Server Name</span>
-                            <input
-                                type="text"
-                                value={serverName}
-                                onChange={(e) => setServerName(e.target.value)}
-                                className="w-full p-2 border rounded mt-1"
-                            />
-                        </label>
-                        <label className="block mb-4">
-                            <span className="text-gray-700">Upload Server Image</span>
-                            <input
-                                type="file"
-                                onChange={(e) => setSelectedFile(e.target.files[0])}
-                                className="w-full p-2 border rounded mt-1"
-                            />
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
+                    <div className="bg-gray-800 text-white p-6 rounded-md shadow-lg w-80">
+                        {/* Tabs */}
+                        <div className="flex mb-4 border-b border-gray-700">
                             <button
-                                onClick={handleFileUpload}
-                                className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                            >
-                                Upload
-                            </button>
-                        </label>
-                        <div className="flex justify-end">
-                            <button
-                                onClick={closeDialog}
-                                className="px-4 py-2 bg-gray-400 text-white rounded mr-2 hover:bg-gray-500"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleCreateServer}
-                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                disabled={!serverImage}
+                                onClick={() => setActiveTab("create")}
+                                className={`flex-1 py-2 text-center ${
+                                    activeTab === "create"
+                                        ? "border-b-2 border-blue-500"
+                                        : "text-gray-400 hover:text-white"
+                                }`}
                             >
                                 Create
                             </button>
+                            <button
+                                onClick={() => setActiveTab("join")}
+                                className={`flex-1 py-2 text-center ${
+                                    activeTab === "join"
+                                        ? "border-b-2 border-blue-500"
+                                        : "text-gray-400 hover:text-white"
+                                }`}
+                            >
+                                Join
+                            </button>
                         </div>
+
+                        {activeTab === "create" && (
+                            <>
+                                {/* Create Server */}
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium">Server Name</span>
+                                    <input
+                                        type="text"
+                                        value={serverName}
+                                        onChange={(e) => setServerName(e.target.value)}
+                                        className="w-full mt-1 p-2 bg-gray-700 text-white rounded"
+                                    />
+                                </label>
+
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium">Server Image</span>
+                                    <input
+                                        type="file"
+                                        onChange={(e) => setServerImage(e.target.files[0])}
+                                        className="w-full mt-1 p-2 bg-gray-700 text-white rounded"
+                                    />
+                                </label>
+
+                                <button
+                                    onClick={handleFileUpload}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded mb-4"
+                                    disabled={!serverImage}
+                                >
+                                    Upload Image
+                                </button>
+
+                                <button
+                                    onClick={handleCreateServer}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded mb-4"
+                                    disabled={!uploadedImageUrl}
+                                >
+                                    Create Server
+                                </button>
+                            </>
+                        )}
+
+                        {activeTab === "join" && (
+                            <>
+                                {/* Join Server */}
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium">Invite Code</span>
+                                    <input
+                                        type="text"
+                                        value={inviteCode}
+                                        onChange={(e) => setInviteCode(e.target.value)}
+                                        className="w-full mt-1 p-2 bg-gray-700 text-white rounded"
+                                    />
+                                </label>
+                                <button
+                                    onClick={handleJoinServer}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded mb-4"
+                                >
+                                    Join Server
+                                </button>
+                            </>
+                        )}
+
+                        <button
+                            onClick={closeDialog}
+                            className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}

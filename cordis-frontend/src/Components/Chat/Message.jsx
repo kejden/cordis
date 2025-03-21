@@ -20,7 +20,7 @@ const Message = ({ message, handleEditMessage, handleDeleteMessage }) => {
     return (
         <div
             className={`
-                group relative p-3 rounded-lg max-w-lg
+                group relative p-3 rounded-lg max-w-full
                 ${isOwnMessage ? "bg-blue-500 self-end" : "bg-gray-700 self-start"}
             `}
         >
