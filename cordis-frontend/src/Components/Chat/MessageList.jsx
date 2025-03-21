@@ -8,7 +8,7 @@ const MessageList = ({ messages, handleEditMessage, handleDeleteMessage }) => {
         if (containerRef.current) {
             setTimeout(() => {
                 containerRef.current.scrollTop = containerRef.current.scrollHeight;
-            }, 100); // Adjust the delay as needed
+            }, 100);
         }
     }, [messages]);
 
@@ -31,7 +31,7 @@ const MessageList = ({ messages, handleEditMessage, handleDeleteMessage }) => {
             {messages.length > 0 ? (
                 messages.map((message) => (
                     <Message
-                        key={message.id} // Use message.id as the key
+                        key={message.id}
                         message={message}
                         handleEditMessage={handleEditMessage}
                         handleDeleteMessage={handleDeleteMessage}

@@ -95,7 +95,6 @@ const UserCard = () => {
             {isDialogOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
                     <div className="bg-gray-800 text-white p-6 rounded-md shadow-lg w-80">
-                        {/* Tabs */}
                         <div className="flex mb-4 border-b border-gray-700">
                             <button
                                 onClick={() => setActiveTab("profile")}
@@ -107,7 +106,6 @@ const UserCard = () => {
                             >
                                 Profile
                             </button>
-                            {/* Removed Join Server tab */}
                         </div>
 
                         {activeTab === "profile" && (
@@ -151,8 +149,6 @@ const UserCard = () => {
                                 </button>
                             </>
                         )}
-
-                        {/* Removed the entire “joinServer” section */}
 
                         <button
                             onClick={closeDialog}

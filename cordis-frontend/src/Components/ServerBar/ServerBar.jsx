@@ -12,18 +12,14 @@ import ServerBarIcon from "./ServerBarIcon.jsx";
 const ServerBar = ({ servers, openServer, closeServer }) => {
     const dispatch = useDispatch();
 
-    // Toggle dialog
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    // Tab state
     const [activeTab, setActiveTab] = useState("create");
 
-    // For creating a server
     const [serverName, setServerName] = useState("");
     const [serverImage, setServerImage] = useState(null);
     const [uploadedImageUrl, setUploadedImageUrl] = useState("");
 
-    // For joining a server
     const [inviteCode, setInviteCode] = useState("");
 
     const openDialog = () => {
@@ -43,7 +39,6 @@ const ServerBar = ({ servers, openServer, closeServer }) => {
         openServer(serverId);
     };
 
-    // ---------------- CREATE SERVER ----------------
     const handleFileUpload = async () => {
         if (!serverImage) return;
         const formData = new FormData();
@@ -80,7 +75,6 @@ const ServerBar = ({ servers, openServer, closeServer }) => {
         }
     };
 
-    // ---------------- JOIN SERVER ----------------
     const handleJoinServer = async () => {
         if (!inviteCode) return;
         try {
@@ -125,7 +119,6 @@ const ServerBar = ({ servers, openServer, closeServer }) => {
                 </div>
             </div>
 
-            {/* Dialog with tabs */}
             {isDialogOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
                     <div className="bg-gray-800 text-white p-6 rounded-md shadow-lg w-80">
@@ -155,7 +148,6 @@ const ServerBar = ({ servers, openServer, closeServer }) => {
 
                         {activeTab === "create" && (
                             <>
-                                {/* Create Server */}
                                 <label className="block mb-2">
                                     <span className="text-sm font-medium">Server Name</span>
                                     <input
@@ -195,7 +187,6 @@ const ServerBar = ({ servers, openServer, closeServer }) => {
 
                         {activeTab === "join" && (
                             <>
-                                {/* Join Server */}
                                 <label className="block mb-2">
                                     <span className="text-sm font-medium">Invite Code</span>
                                     <input
