@@ -22,6 +22,7 @@ import io.ndk.cordis_backend.entity.DirectMessageEntity;
 import io.ndk.cordis_backend.entity.ServerMessageEntity;
 import io.ndk.cordis_backend.entity.UserEntity;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -217,17 +218,26 @@ public class MessageServiceTests {
     @Test
     void testEditMessage_GroupMessage_Success() {
         Long messageId = 1L;
+        Principal principal = () -> "principalUser@example.com";
+        UserEntity sender = UserEntity.builder()
+                .id(10L)
+                .email("principalUser@example.com")
+                .build();
+
         MessageRequest request = MessageRequest.builder()
                 .group(true)
                 .content("Edited group content")
+                .userId(sender.getId())
                 .build();
 
         ServerMessageEntity original = ServerMessageEntity.builder()
                 .id(messageId)
                 .chatId(100L)
                 .content("Old content")
+                .sender(sender)
                 .build();
         when(serverMessageRepository.findById(messageId)).thenReturn(Optional.of(original));
+        when(userRepository.findByEmail("principalUser@example.com")).thenReturn(Optional.of(sender));
 
         ServerMessageEntity savedEntity = ServerMessageEntity.builder()
                 .id(messageId)
@@ -241,7 +251,7 @@ public class MessageServiceTests {
                 .build();
         when(serverMessageMapper.mapTo(savedEntity)).thenReturn(mappedResponse);
 
-        MessageResponse result = messageService.editMessage(messageId, request);
+        MessageResponse result = messageService.editMessage(messageId, request, principal);
 
         assertNotNull(result);
         assertEquals("Edited group content", result.getContent());
@@ -254,16 +264,27 @@ public class MessageServiceTests {
     @Test
     void testEditMessage_DirectMessage_Success() {
         Long messageId = 2L;
+        Principal principal = () -> "principalUser@example.com";
+        UserEntity sender = UserEntity.builder()
+                .id(10L)
+                .email("principalUser@example.com")
+                .build();
+
         MessageRequest request = MessageRequest.builder()
                 .group(false)
                 .content("Edited direct content")
+                .userId(sender.getId())
                 .build();
 
         DirectMessageEntity original = DirectMessageEntity.builder()
                 .id(messageId)
                 .chatId(200L)
                 .content("Old direct")
+                .sender(sender)
                 .build();
+
+        when(userRepository.findByEmail("principalUser@example.com")).thenReturn(Optional.of(sender));
+
         when(directMessageRepository.findById(messageId)).thenReturn(Optional.of(original));
 
         DirectMessageEntity savedEntity = DirectMessageEntity.builder()
@@ -278,7 +299,7 @@ public class MessageServiceTests {
                 .build();
         when(directMessageMapper.mapTo(savedEntity)).thenReturn(mappedResponse);
 
-        MessageResponse result = messageService.editMessage(messageId, request);
+        MessageResponse result = messageService.editMessage(messageId, request, principal);
 
         assertNotNull(result);
         assertEquals("Edited direct content", result.getContent());
@@ -291,16 +312,18 @@ public class MessageServiceTests {
     @Test
     void testEditMessage_NoSuchMessage_Group() {
         Long messageId = 999L;
+        Principal principal = () -> "principalUser@example.com";
         MessageRequest request = MessageRequest.builder()
                 .group(true)
                 .content("Any content")
                 .build();
 
         when(serverMessageRepository.findById(messageId)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("principalUser@example.com")).thenReturn(Optional.of(new UserEntity()));
 
         CustomException ex = assertThrows(
                 CustomException.class,
-                () -> messageService.editMessage(messageId, request));
+                () -> messageService.editMessage(messageId, request, principal));
         assertEquals(BusinessErrorCodes.NO_SUCH_MESSAGE, ex.getErrorCode());
 
         verify(serverMessageRepository, times(1)).findById(messageId);
@@ -311,16 +334,18 @@ public class MessageServiceTests {
     @Test
     void testEditMessage_NoSuchMessage_Direct() {
         Long messageId = 888L;
+        Principal principal = () -> "principalUser@example.com";
         MessageRequest request = MessageRequest.builder()
                 .group(false)
                 .content("Any content")
                 .build();
 
         when(directMessageRepository.findById(messageId)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("principalUser@example.com")).thenReturn(Optional.of(new UserEntity()));
 
         CustomException ex = assertThrows(
                 CustomException.class,
-                () -> messageService.editMessage(messageId, request));
+                () -> messageService.editMessage(messageId, request, principal));
         assertEquals(BusinessErrorCodes.NO_SUCH_MESSAGE, ex.getErrorCode());
 
         verify(directMessageRepository, times(1)).findById(messageId);
@@ -331,15 +356,22 @@ public class MessageServiceTests {
     @Test
     void testDeleteMessage_GroupMessage_Success() {
         Long messageId = 33L;
+        Principal principal = () -> "principalUser@example.com";
+        UserEntity sender = UserEntity.builder()
+                .id(10L)
+                .email("principalUser@example.com")
+                .build();
         ServerMessageEntity entity = ServerMessageEntity.builder()
                 .id(messageId)
                 .chatId(777L)
                 .content("Will be deleted")
+                .sender(sender)
                 .build();
 
         when(serverMessageRepository.findById(messageId)).thenReturn(Optional.of(entity));
+        when(userRepository.findByEmail("principalUser@example.com")).thenReturn(Optional.of(sender));
 
-        messageService.deleteMessage(messageId, true);
+        messageService.deleteMessage(messageId, true, principal);
 
         verify(serverMessageRepository, times(1)).delete(entity);
         verify(messagingTemplate, times(1))
@@ -349,15 +381,24 @@ public class MessageServiceTests {
     @Test
     void testDeleteMessage_DirectMessage_Success() {
         Long messageId = 44L;
+        Principal principal = () -> "principalUser@example.com";
+        UserEntity sender = UserEntity.builder()
+                .id(10L)
+                .email("principalUser@example.com")
+                .build();
+
         DirectMessageEntity entity = DirectMessageEntity.builder()
                 .id(messageId)
                 .chatId(999L)
+                .sender(sender)
                 .content("Will be deleted direct")
                 .build();
 
         when(directMessageRepository.findById(messageId)).thenReturn(Optional.of(entity));
+        when(userRepository.findByEmail("principalUser@example.com"))
+                .thenReturn(Optional.of(sender));
 
-        messageService.deleteMessage(messageId, false);
+        messageService.deleteMessage(messageId, false, principal);
 
         verify(directMessageRepository, times(1)).delete(entity);
         verify(messagingTemplate, times(1))
@@ -367,11 +408,16 @@ public class MessageServiceTests {
     @Test
     void testDeleteMessage_NoSuchMessage_Group() {
         Long messageId = 500L;
+        Principal principal = () -> "principalUser@example.com";
+
         when(serverMessageRepository.findById(messageId)).thenReturn(Optional.empty());
+
+        when(userRepository.findByEmail("principalUser@example.com"))
+                .thenReturn(Optional.of(new UserEntity()));
 
         CustomException ex = assertThrows(
                 CustomException.class,
-                () -> messageService.deleteMessage(messageId, true)
+                () -> messageService.deleteMessage(messageId, true, principal)
         );
         assertEquals(BusinessErrorCodes.NO_SUCH_MESSAGE, ex.getErrorCode());
 
@@ -383,15 +429,133 @@ public class MessageServiceTests {
     @Test
     void testDeleteMessage_NoSuchMessage_Direct() {
         Long messageId = 501L;
+        Principal principal = () -> "principalUser@example.com";
+
         when(directMessageRepository.findById(messageId)).thenReturn(Optional.empty());
+
+        when(userRepository.findByEmail("principalUser@example.com"))
+                .thenReturn(Optional.of(new UserEntity()));
 
         CustomException ex = assertThrows(
                 CustomException.class,
-                () -> messageService.deleteMessage(messageId, false)
+                () -> messageService.deleteMessage(messageId, false, principal)
         );
         assertEquals(BusinessErrorCodes.NO_SUCH_MESSAGE, ex.getErrorCode());
 
         verify(directMessageRepository, times(1)).findById(messageId);
+        verify(directMessageRepository, never()).delete(any());
+        verify(messagingTemplate, never()).convertAndSend(anyString(), Optional.ofNullable(any()));
+    }
+
+    @Test
+    void testEditMessage_DirectMessage_UserIsNotSender_ThrowsNoPermission() {
+        // GIVEN
+        Long messageId = 1L;
+        MessageRequest request = MessageRequest.builder()
+                .group(false)
+                .content("Trying to edit someone else's DM")
+                .build();
+
+        UserEntity realSender = UserEntity.builder()
+                .id(10L)
+                .email("actualSender@example.com")
+                .build();
+        DirectMessageEntity existingMessage = DirectMessageEntity.builder()
+                .id(messageId)
+                .sender(realSender)
+                .content("Original DM content")
+                .build();
+
+        when(directMessageRepository.findById(messageId)).thenReturn(Optional.of(existingMessage));
+
+        Principal principal = () -> "principalUser@example.com";
+        UserEntity principalUserEntity = UserEntity.builder()
+                .id(20L)
+                .email("principalUser@example.com")
+                .build();
+        when(userRepository.findByEmail("principalUser@example.com"))
+                .thenReturn(Optional.of(principalUserEntity));
+
+        CustomException ex = assertThrows(CustomException.class, () ->
+                messageService.editMessage(messageId, request, principal)
+        );
+        assertEquals(BusinessErrorCodes.NO_PERMISSION, ex.getErrorCode());
+        verify(directMessageRepository, never()).save(any());
+        verify(messagingTemplate, never()).convertAndSend(anyString(), Optional.ofNullable(any()));
+    }
+
+    @Test
+    void testEditMessage_DirectMessage_UserIsSender_Success() {
+        Long messageId = 2L;
+        MessageRequest request = MessageRequest.builder()
+                .group(false)
+                .content("Updated DM content")
+                .build();
+
+        UserEntity realSender = UserEntity.builder()
+                .id(1L)
+                .email("principalUser@example.com")
+                .build();
+        DirectMessageEntity existingMessage = DirectMessageEntity.builder()
+                .id(messageId)
+                .sender(realSender)
+                .content("Original DM content")
+                .build();
+
+        when(directMessageRepository.findById(messageId))
+                .thenReturn(Optional.of(existingMessage));
+
+        Principal principal = () -> "principalUser@example.com";
+        when(userRepository.findByEmail("principalUser@example.com"))
+                .thenReturn(Optional.of(realSender));
+
+        DirectMessageEntity savedMessage = DirectMessageEntity.builder()
+                .id(messageId)
+                .sender(realSender)
+                .content("Updated DM content")
+                .build();
+        when(directMessageRepository.save(existingMessage)).thenReturn(savedMessage);
+
+        MessageResponse mappedResponse = MessageResponse.builder()
+                .content("Updated DM content")
+                .build();
+        when(directMessageMapper.mapTo(savedMessage)).thenReturn(mappedResponse);
+
+        MessageResponse result = messageService.editMessage(messageId, request, principal);
+
+        assertNotNull(result);
+        assertEquals("Updated DM content", result.getContent());
+        verify(directMessageRepository).save(existingMessage);
+        verify(messagingTemplate).convertAndSend(eq("/user/" + savedMessage.getChatId()), eq(mappedResponse));
+    }
+
+    @Test
+    void testDeleteMessage_DirectMessage_UserIsNotSender_ThrowsNoPermission() {
+        Long messageId = 5L;
+        boolean isGroup = false;
+        UserEntity realSender = UserEntity.builder()
+                .id(10L)
+                .email("somebodyElse@example.com")
+                .build();
+        DirectMessageEntity existingMessage = DirectMessageEntity.builder()
+                .id(messageId)
+                .sender(realSender)
+                .build();
+        when(directMessageRepository.findById(messageId))
+                .thenReturn(Optional.of(existingMessage));
+
+        Principal principal = () -> "principalUser@example.com";
+        UserEntity principalUser = UserEntity.builder()
+                .id(20L)
+                .email("principalUser@example.com")
+                .build();
+        when(userRepository.findByEmail("principalUser@example.com"))
+                .thenReturn(Optional.of(principalUser));
+
+        CustomException ex = assertThrows(CustomException.class, () ->
+                messageService.deleteMessage(messageId, isGroup, principal)
+        );
+        assertEquals(BusinessErrorCodes.NO_PERMISSION, ex.getErrorCode());
         verify(directMessageRepository, never()).delete(any());
         verify(messagingTemplate, never()).convertAndSend(anyString(), Optional.ofNullable(any()));
     }
