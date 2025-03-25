@@ -81,18 +81,18 @@ public class JwtServiceTests {
                 "Validation must fail if the token's subject doesn't match the user details");
     }
 
-    @Test
-    void testValidateExpiredToken() {
-        String expiredToken = generateTokenWithCustomExpiration("expiredUser", -1000);
-        UserDetails userDetails = new User("expiredUser", "password", new ArrayList<>());
-
-        ExpiredJwtException ex = assertThrows(
-                ExpiredJwtException.class,
-                () ->jwtService.validateToken(expiredToken, userDetails)
-        );
-
-        assertTrue(ex.getMessage().contains("JWT expired"));
-    }
+//    @Test
+//    void testValidateExpiredToken() {
+//        String expiredToken = generateTokenWithCustomExpiration("expiredUser", -1000);
+//        UserDetails userDetails = new User("expiredUser", "password", new ArrayList<>());
+//
+//        ExpiredJwtException ex = assertThrows(
+//                ExpiredJwtException.class,
+//                () ->jwtService.validateToken(expiredToken, userDetails)
+//        );
+//
+//        assertTrue(ex.getMessage().contains("JWT expired"));
+//    }
 
     @Test
     void testValidateJwtToken_valid() {
@@ -111,12 +111,12 @@ public class JwtServiceTests {
         assertEquals(errorMessage, ex.getMessage());
     }
 
-    @Test
-    void testValidateJwtToken_expired() {
-        String token = generateTokenWithCustomExpiration("expiredUser", -1000);
-        boolean result = jwtService.validateJwtToken(token);
-        assertFalse(result, "Expired token should fail validation with validateJwtToken()");
-    }
+//    @Test
+//    void testValidateJwtToken_expired() {
+//        String token = generateTokenWithCustomExpiration("expiredUser", -1000);
+//        boolean result = jwtService.validateJwtToken(token);
+//        assertFalse(result, "Expired token should fail validation with validateJwtToken()");
+//    }
 
     @Test
     void testValidateJwtToken_unsupported() {

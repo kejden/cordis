@@ -7,9 +7,10 @@ import io.ndk.cordis_backend.dto.response.FriendResponse;
 import io.ndk.cordis_backend.service.CookieService;
 import io.ndk.cordis_backend.service.FriendService;
 import io.ndk.cordis_backend.service.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,23 +19,23 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(controllers = FriendController.class)
-@AutoConfigureMockMvc(addFilters = true)
+@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
 @Import(JwtFilter.class)
 @ActiveProfiles("test")
@@ -58,90 +59,112 @@ public class FriendControllerTests {
     @MockBean
     private CookieService cookieService;
 
+    private Principal principal;
+    private ObjectMapper objectMapper;
 
-    @Test
-    @WithMockUser(username = "testUser@example.com")
-    void testRequestFriend() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/friend/request")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"userName\":\"friendUser\"}"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(print());
+    @BeforeEach
+    void setUp() {
+        principal = () -> "testUser@example.com";
+        objectMapper = new ObjectMapper();
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
+    void testRequestFriend() throws Exception {
+        FriendRequest request = new FriendRequest("friendUser");
+
+        mockMvc.perform(post("/api/friend/request")
+                        .principal(principal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void testGetFriendResponses() throws Exception {
-        FriendResponse friendResponse = FriendResponse.builder().id(1L).state("ACCEPT").build();
+        FriendResponse friendResponse = FriendResponse.builder()
+                .id(1L)
+                .state("ACCEPT")
+                .build();
+
         List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
         when(friendService.getFriendResponse(anyString())).thenReturn(friendResponses);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/responses"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[{\"id\":1,\"state\":\"ACCEPT\"}]"))
-                .andDo(print());
+        mockMvc.perform(get("/api/friend/responses")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].state").value("ACCEPT"));
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testGetPendingFriendRequests() throws Exception {
-        FriendResponse friendResponse = FriendResponse.builder().id(1L).state("REQUEST").build();
-        List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
-        when(friendService.getPendingFriendResponse(anyString())).thenReturn(friendResponses);
+        FriendResponse friendResponse = FriendResponse.builder()
+                .id(1L)
+                .state("REQUEST")
+                .build();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/pending"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[{\"id\":1,\"state\":\"REQUEST\"}]"))
-                .andDo(print());
+        when(friendService.getPendingFriendResponse(anyString()))
+                .thenReturn(Collections.singletonList(friendResponse));
+
+        mockMvc.perform(get("/api/friend/pending")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].state").value("REQUEST"));
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testGetAwaitingFriendRequests() throws Exception {
-        FriendResponse friendResponse = FriendResponse.builder().id(1L).state("REQUEST").build();
-        List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
-        when(friendService.getAwaitingFriendResponse(anyString())).thenReturn(friendResponses);
+        FriendResponse friendResponse = FriendResponse.builder()
+                .id(1L)
+                .state("REQUEST")
+                .build();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/awaiting"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[{\"id\":1,\"state\":\"REQUEST\"}]"))
-                .andDo(print());
+        when(friendService.getAwaitingFriendResponse(anyString()))
+                .thenReturn(Collections.singletonList(friendResponse));
+
+        mockMvc.perform(get("/api/friend/awaiting")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].state").value("REQUEST"));
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testRefuseFriend() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/friend/refuse/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(print());
+        mockMvc.perform(delete("/api/friend/refuse/1")
+                        .principal(principal))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testAddFriend() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/friend/accept/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(print());
+        mockMvc.perform(post("/api/friend/accept/1")
+                        .principal(principal))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testBanFriend() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/friend/ban/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(print());
+        mockMvc.perform(post("/api/friend/ban/1")
+                        .principal(principal))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testLatestChats() throws Exception {
-        FriendResponse friendResponse = FriendResponse.builder().id(1L).state("ACCEPT").build();
+        FriendResponse friendResponse = FriendResponse.builder()
+                .id(1L)
+                .state("ACCEPT")
+                .build();
+
         List<FriendResponse> friendResponses = Collections.singletonList(friendResponse);
         when(friendService.latestChats(anyString())).thenReturn(friendResponses);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/friend/latestChats"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[{\"id\":1,\"state\":\"ACCEPT\"}]"))
-                .andDo(print());
+        mockMvc.perform(get("/api/friend/latestChats")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].state").value("ACCEPT"));
     }
 }

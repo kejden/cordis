@@ -7,9 +7,10 @@ import io.ndk.cordis_backend.dto.response.MessageResponse;
 import io.ndk.cordis_backend.service.CookieService;
 import io.ndk.cordis_backend.service.JwtService;
 import io.ndk.cordis_backend.service.MessageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,21 +19,24 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(controllers = ServerMessageController.class)
-@AutoConfigureMockMvc(addFilters = true)
+@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
 @Import(JwtFilter.class)
 @ActiveProfiles("test")
@@ -56,43 +60,51 @@ public class ServerMessageControllerTests {
     @MockBean
     private CookieService cookieService;
 
+    private Principal principal;
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        principal = () -> "testUser@example.com";
+        objectMapper = new ObjectMapper();
+    }
+
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testCreateMessage() throws Exception {
-        MessageRequest messageRequest = MessageRequest.builder()
+        MessageRequest request = MessageRequest.builder()
                 .group(true)
                 .userId(1L)
                 .chatId(100L)
                 .content("Hello group!")
                 .build();
 
-        MessageResponse messageResponse = MessageResponse.builder()
+        MessageResponse response = MessageResponse.builder()
                 .content("Hello group!")
                 .build();
 
-        Mockito.when(messageService.saveMessage(any(MessageRequest.class))).thenReturn(messageResponse);
+        when(messageService.saveMessage(any(MessageRequest.class))).thenReturn(response);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/server-messages/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"group\":true,\"userId\":1,\"chatId\":100,\"content\":\"Hello group!\"}"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("{\"content\":\"Hello group!\"}"))
-                .andDo(print());
+        mockMvc.perform(post("/api/server-messages/create")
+                        .principal(principal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Hello group!"));
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
     void testGetMessages() throws Exception {
-        MessageResponse messageResponse = MessageResponse.builder()
+        MessageResponse response = MessageResponse.builder()
                 .content("Hello group!")
                 .build();
-        List<MessageResponse> messageResponses = Collections.singletonList(messageResponse);
 
-        Mockito.when(messageService.getGroupMessages(anyLong())).thenReturn(messageResponses);
+        List<MessageResponse> responses = Collections.singletonList(response);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/server-messages/100"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[{\"content\":\"Hello group!\"}]"))
-                .andDo(print());
+        when(messageService.getGroupMessages(eq(100L))).thenReturn(responses);
+
+        mockMvc.perform(get("/api/server-messages/100")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].content").value("Hello group!"));
     }
 }

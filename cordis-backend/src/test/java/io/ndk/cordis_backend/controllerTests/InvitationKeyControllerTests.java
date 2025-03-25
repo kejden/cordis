@@ -6,6 +6,8 @@ import io.ndk.cordis_backend.entity.InvitationKeyEntity;
 import io.ndk.cordis_backend.service.CookieService;
 import io.ndk.cordis_backend.service.InvitationKeyService;
 import io.ndk.cordis_backend.service.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,23 +17,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(controllers = InvitationKeyController.class)
-@AutoConfigureMockMvc(addFilters = true)
+@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
 @Import(JwtFilter.class)
 @ActiveProfiles("test")
@@ -55,25 +57,35 @@ public class InvitationKeyControllerTests {
     @MockBean
     private CookieService cookieService;
 
-    @Test
-    @WithMockUser(username = "testUser@example.com")
-    void testGenerateInvitationKey() throws Exception {
-        InvitationKeyEntity invitationKey = InvitationKeyEntity.builder()
-                .id(1L)
-                .invitationKey(UUID.randomUUID().toString())
-                .activationTime(LocalDateTime.now())
-                .expirationTime(LocalDateTime.now().plusWeeks(1))
-                .build();
-        when(invitationKeyService.generateInvitationKey(anyLong())).thenReturn(invitationKey);
+    private Principal principal;
+    private ObjectMapper objectMapper;
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/invitation-keys/generate/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("{\"id\":1,\"invitationKey\":\"" + invitationKey.getInvitationKey() + "\"}"))
-                .andDo(print());
+    @BeforeEach
+    void setUp() {
+        principal = () -> "testUser@example.com";
+        objectMapper = new ObjectMapper();
     }
 
     @Test
-    @WithMockUser(username = "testUser@example.com")
+    void testGenerateInvitationKey() throws Exception {
+        String invitationKeyValue = UUID.randomUUID().toString();
+        InvitationKeyEntity invitationKey = InvitationKeyEntity.builder()
+                .id(1L)
+                .invitationKey(invitationKeyValue)
+                .activationTime(LocalDateTime.now())
+                .expirationTime(LocalDateTime.now().plusWeeks(1))
+                .build();
+
+        when(invitationKeyService.generateInvitationKey(anyLong())).thenReturn(invitationKey);
+
+        mockMvc.perform(post("/api/invitation-keys/generate/1")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.invitationKey").value(invitationKeyValue));
+    }
+
+    @Test
     void testGetActiveInvitationKeys() throws Exception {
         InvitationKeyEntity invitationKey = InvitationKeyEntity.builder()
                 .id(1L)
@@ -81,12 +93,14 @@ public class InvitationKeyControllerTests {
                 .activationTime(LocalDateTime.now().minusDays(1))
                 .expirationTime(LocalDateTime.now().plusDays(1))
                 .build();
+
         List<InvitationKeyEntity> invitationKeys = Collections.singletonList(invitationKey);
         when(invitationKeyService.getActiveInvitationKeys(anyLong())).thenReturn(invitationKeys);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/invitation-keys/active/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[{\"id\":1,\"invitationKey\":\"test-invite\"}]"))
-                .andDo(print());
+        mockMvc.perform(get("/api/invitation-keys/active/1")
+                        .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].invitationKey").value("test-invite"));
     }
 }

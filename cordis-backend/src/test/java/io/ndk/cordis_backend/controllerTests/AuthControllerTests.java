@@ -27,6 +27,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,32 +58,35 @@ public class AuthControllerTests {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    public void testSignUp() throws Exception {
-        AccountSignUp accountSignUp = AccountSignUp.builder()
-                .email("test@example.com").password("12345").build();
+    void testSignUp() throws Exception {
+        AccountSignUp signUpRequest = AccountSignUp.builder()
+                .email("test@example.com")
+                .password("12345")
+                .build();
 
-        when(userService.signUp(Mockito.any(AccountSignUp.class))).thenReturn(accountSignUp);
+        when(userService.signUp(any(AccountSignUp.class))).thenReturn(signUpRequest);
+
         mockMvc.perform(post("/auth/sign-up")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"test@example.com\",\"password\":\"12345\"}"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"test@example.com\",\"password\":\"12345\"}"))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    public void testSignIn() throws Exception {
-        when(userService.signIn(Mockito.any(SignInRequest.class))).thenReturn(null);
-        when(jwtService.generateToken(Mockito.anyString())).thenReturn("testToken");
-        when(cookieService.getNewCookie("jwt", "testToken"))
-                .thenReturn(new Cookie("jwt","testToken"));
+    void testSignIn() throws Exception {
+        when(userService.signIn(any(SignInRequest.class))).thenReturn(null);
+        when(jwtService.generateToken(anyString())).thenReturn("testToken");
+        when(cookieService.getNewCookie("jwt", "testToken")).thenReturn(new Cookie("jwt", "testToken"));
+
         mockMvc.perform(post("/auth/sign-in")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"test@example.com\",\"password\":\"12345\"}"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"test@example.com\",\"password\":\"12345\"}"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testLogout() throws Exception {
-        when(cookieService.getJwtCookie(Mockito.any())).thenReturn("jwtCookieValue");
+    void testLogout() throws Exception {
+        when(cookieService.getJwtCookie(any())).thenReturn("jwtCookieValue");
         when(jwtService.extractUserName("jwtCookieValue")).thenReturn("test@example.com");
         when(cookieService.deleteCookie("jwt")).thenReturn(new Cookie("jwt", null));
 
