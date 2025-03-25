@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -37,14 +38,22 @@ public class MessageController {
     }
 
     @PutMapping("/edit/{messageId}")
-    public ResponseEntity<MessageResponse> editMessage(@PathVariable Long messageId, @Valid @RequestBody MessageRequest newMessage) {
-        MessageResponse updatedMessage = messageService.editMessage(messageId, newMessage);
+    public ResponseEntity<MessageResponse> editMessage(
+            @PathVariable Long messageId,
+            @Valid @RequestBody MessageRequest newMessage,
+            Principal principal
+    ) {
+        MessageResponse updatedMessage = messageService.editMessage(messageId, newMessage, principal);
         return new ResponseEntity<>(updatedMessage, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteMessage(@PathVariable Long id, @RequestParam boolean isGroup) {
-        messageService.deleteMessage(id, isGroup);
+    public ResponseEntity<?> deleteMessage(
+            @PathVariable Long id,
+            @RequestParam boolean isGroup,
+            Principal principal
+    ) {
+        messageService.deleteMessage(id, isGroup, principal);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

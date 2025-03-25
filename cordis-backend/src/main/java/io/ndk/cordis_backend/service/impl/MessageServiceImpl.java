@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -80,13 +81,16 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public MessageResponse editMessage(Long messageId, MessageRequest newMessage) {
+    public MessageResponse editMessage(Long messageId, MessageRequest newMessage, Principal principal) {
+        UserEntity user = getUser(principal.getName());
         if(newMessage.getGroup()) {
             ServerMessageEntity message = serverMessageRepository.findById(messageId).orElseThrow(
                     () -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE)
             );
+            if(!message.getSender().equals(user)){
+                throw new CustomException(BusinessErrorCodes.NO_PERMISSION);
+            }
             message.setContent(newMessage.getContent());
-//            message.setTimestamp(LocalDateTime.now());
             ServerMessageEntity save = serverMessageRepository.save(message);
             MessageResponse messageResponse = serverMessagemapper.mapTo(save);
             messagingTemplate.convertAndSend("/group/" + message.getChatId(), messageResponse);
@@ -95,8 +99,10 @@ public class MessageServiceImpl implements MessageService {
             DirectMessageEntity message = messageRepository.findById(messageId).orElseThrow(
                     () -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE)
             );
+            if(!message.getSender().equals(user)){
+                throw new CustomException(BusinessErrorCodes.NO_PERMISSION);
+            }
             message.setContent(newMessage.getContent());
-//            message.setTimestamp(LocalDateTime.now());
             DirectMessageEntity saved = messageRepository.save(message);
             MessageResponse messageResponse = mapper.mapTo(saved);
             messagingTemplate.convertAndSend("/user/" + message.getChatId(), messageResponse);
@@ -105,22 +111,37 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void deleteMessage(Long id, boolean isGroup) {
+    public void deleteMessage(Long id, boolean isGroup, Principal principal) {
+        UserEntity user = getUser(principal.getName());
         if (isGroup) {
             ServerMessageEntity message = serverMessageRepository.findById(id)
                     .orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE));
+            if(!message.getSender().equals(user)){
+                throw new CustomException(BusinessErrorCodes.NO_PERMISSION);
+            }
             serverMessageRepository.delete(message);
             messagingTemplate.convertAndSend("/group/" + message.getChatId(), Map.of("action", "delete", "messageId", id));
         } else {
             DirectMessageEntity message = messageRepository.findById(id)
                     .orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_MESSAGE));
+            if(!message.getSender().equals(user)){
+                throw new CustomException(BusinessErrorCodes.NO_PERMISSION);
+            }
             messageRepository.delete(message);
             messagingTemplate.convertAndSend("/user/" + message.getChatId(), Map.of("action", "delete", "messageId", id));
         }
     }
 
     private UserEntity getUser(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL));
+        return userRepository.findById(id).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL)
+        );
+    }
+
+    private UserEntity getUser(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new CustomException(BusinessErrorCodes.NO_SUCH_EMAIL)
+        );
     }
 
 }

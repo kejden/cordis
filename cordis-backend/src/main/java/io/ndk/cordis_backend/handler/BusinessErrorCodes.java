@@ -27,7 +27,7 @@ public enum BusinessErrorCodes {
     NO_MEMBER( 314, "There is no such member of this server", HttpStatus.BAD_REQUEST),
     NO_SUCH_ROLE(315, "No such role", HttpStatus.BAD_REQUEST),
     USER_ROLE_EXISTS(316, "This user already has a role", HttpStatus.BAD_REQUEST),
-    NO_PERMISSION(317, "You dont have permission for that", HttpStatus.BAD_REQUEST),
+    NO_PERMISSION(317, "You dont have permission for that", HttpStatus.FORBIDDEN),
     NO_SUCH_CHANNEL(318, "There is no such channel with provided ID", HttpStatus.BAD_REQUEST),
     INCORRECT_INVITE(319, "Provided invite code was incorrect", HttpStatus.BAD_REQUEST),
     NO_SUCH_MESSAGE(320, "There is no such message", HttpStatus.BAD_REQUEST),;
